@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#phtools=/exports/home/clai/clai/phtools/
+PRAATSCRIPTS=../praatscripts/
 PRAAT=/exports/home/clai/.local/bin/praat
 spurtfile=$1
 spurtdir=$2 	## This is the output directory 	
@@ -47,7 +47,7 @@ do
         fi
 
 	echo  $wavfile $outfile $start $end $indir $outdir $conv 
-	$PRAAT ./extract-feats.praat $wavfile $outfile $start $end $indir $outdir $conv 
+	$PRAAT $PRAATSCRIPTS/extract-feats.praat $wavfile $outfile $start $end $indir $outdir $conv 
 
 done  
 
