@@ -1,7 +1,7 @@
-## This script extracts a segment from a larger .wav file.
+## Extract F0 and intensity time series from a .wav file.
 
 form getfilename
-text segfile	segfile	
+text wavfile	wavfile	
 text outfile	outfile		 
 real ustart	0.0
 real uend	0.0		
@@ -13,7 +13,7 @@ endform
 print 'ustart'
 print 'uend''newline$'
 
-currfile$ = indir$ + segfile$
+currfile$ = indir$ + wavfile$
 print 'outdir$''newline$''currfile$''newline$'
 
 Read from file... 'currfile$'
@@ -25,7 +25,7 @@ shname$ = selected$ ("Sound")
 #print "Part name: "'shname$''newline$'
 
 ################################################
-# F0 extraction 
+# F0 extraction: set params 
 ################################################
 tstep = 0.0
 defmin = 70
@@ -42,12 +42,19 @@ minf0 = round(minf0 * 0.72) - 10
 maxf0 = round(maxf0 * 1.90) + 10
 print 'shname$''tab$''minf0''tab$''maxf0''newline$'
 
+#################################################
+## Intensity extraction 
+#################################################
+
 select Sound 'shname$'
 To Intensity... 'minf0' 'tstep' no
 Down to IntensityTier
 Write to short text file... 'outdir$'/'conv$'-int/'outfile$'.IntensityTier
 print 'outdir$'/'conv$'-int/'outfile$'.IntensityTier'newline$'
 
+################################################
+# F0 extraction 
+################################################
 
 select Sound 'shname$'
 To Pitch (ac)... 'tstep' 'minf0' 15 no 0.03 0.45 0.01 2 0.14 'maxf0'
@@ -61,11 +68,6 @@ print 'outdir$'/'conv$'-f0/'outfile$'.PitchTier'newline$'
 if npoints > 3 
         Write to PitchTier spreadsheet file... 'outdir$'/'conv$'-f0/'outfile$'.PitchTier
 endif
-
-
-#################################################
-## Intensity extraction 
-#################################################
 
 
 select Sound 'shname$'
