@@ -23,13 +23,6 @@ SPURTSFILE=$4
 RSCRIPTS=../rscripts/
 
 echo "PATH: $PATH"
-
-if [ `ls $SEGSDIR/conv/$CONV/$CONV-$FEATNAME/* | wc -w` -lt 1 ]
-then
-	echo "No $FEATNAME Tiers in $SEGSDIR/conv/$CONV/$CONV-$FEATNAME/! Exiting"	
-        exit 1
-fi
-
 Rscript $RSCRIPTS/get-pros-norm.r $CONV $FEATNAME $SEGSDIR $SPURTSFILE 
 
 

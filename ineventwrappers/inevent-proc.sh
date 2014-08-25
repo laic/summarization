@@ -113,11 +113,11 @@ qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-fe
 ## wtype=asr, prefix=$conv 
 ./inevent-tf-pros-all-sub.sh asr $conv
 
-### Get augmented lexical features
-#echo "Name: get-aug-$conv"
-#echo "holds: get-tfpros-asrlex-$conv"
-#qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv ./get-ed-aug-lex.sh $conv
-#
+## Get augmented lexical features
+echo "Name: get-aug-$conv"
+echo "holds: get-tfpros-asrlex-$conv"
+qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv ./get-ed-aug-lex.sh $conv
+
 ### Utterance level prosody delta features 
 ## -N get-tfseq-$featname-$conv -hold_jid get-pwin-$featname-asrutt-$conv
 ### $featname={i0,f0} 
