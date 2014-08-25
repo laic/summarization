@@ -92,9 +92,9 @@ qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-fe
 ## sge: -N get-pros-norm-$FEATNAME-$PREFIX -hold_jid get-spurt-feats-$PREFIX
 ## FEATNAME=f0, PREFIX=$conv
 ./inevent-pros-norm-sub.sh f0 $conv	
-### FEATNAME=i0, PREFIX=$conv
-#./inevent-pros-norm-sub.sh i0 $conv
-#
+## FEATNAME=i0, PREFIX=$conv
+./inevent-pros-norm-sub.sh i0 $conv
+
 ##------------------------------------------------------------
 ### Word level prosodic aggregates
 ### sge: -N get-pwin-$FEATNAME-$WTYPE-$PREFIX -hold_jid get-pros-norm-$FEATNAME-$PREFIX 
