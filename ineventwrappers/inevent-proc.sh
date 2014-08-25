@@ -85,13 +85,13 @@ qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-fe
 ## where PREFIX=$conv
 ./inevent-pros-raw-sub.sh $conv 
 
-### Collate and normalize prosodic features  
-### Outputs one file per conv and feature, e.g. ~/data/inevent/derived/segs/f0/TED0069 
-#
-#
-### sge: -N get-pros-norm-$FEATNAME-$PREFIX -hold_jid get-spurt-feats-$PREFIX
-### FEATNAME=f0, PREFIX=$conv
-#./inevent-pros-norm-sub.sh f0 $conv	
+## Collate and normalize prosodic features  
+## Outputs one file per conv and feature, e.g. ~/data/inevent/derived/segs/f0/TED0069 
+
+
+## sge: -N get-pros-norm-$FEATNAME-$PREFIX -hold_jid get-spurt-feats-$PREFIX
+## FEATNAME=f0, PREFIX=$conv
+./inevent-pros-norm-sub.sh f0 $conv	
 ### FEATNAME=i0, PREFIX=$conv
 #./inevent-pros-norm-sub.sh i0 $conv
 #
