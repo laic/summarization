@@ -95,24 +95,24 @@ qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-fe
 ## FEATNAME=i0, PREFIX=$conv
 ./inevent-pros-norm-sub.sh i0 $conv
 
-##------------------------------------------------------------
-### Word level prosodic aggregates
-### sge: -N get-pwin-$FEATNAME-$WTYPE-$PREFIX -hold_jid get-pros-norm-$FEATNAME-$PREFIX 
-#./inevent-pros-window-sub.sh asrword f0 $conv
-#./inevent-pros-window-sub.sh asrword i0 $conv
-#
-### Utterance level prosodic aggregates
-### sge: -N get-pwin-$FEATNAME-$WTYPE-$PREFIX -hold_jid get-pros-norm-$FEATNAME-$PREFIX 
-### FEATNAME={f0,i0}, WTYPE=asrutt, PREFIX=$conv 
-#./inevent-pros-window-sub.sh asrutt f0 $conv
-#./inevent-pros-window-sub.sh asrutt i0 $conv
-#
-##------------------------------------------------------------
-### combine term-frequency and prosodic word features
-### sge: -N get-tfpros-$wtype{lex}-$conv -hold_jid get-pwin-i0-${wtype}lex-$prefix,get-pwin-f0-${wtype}lex-$prefix
-### wtype=asr, prefix=$conv 
-#./inevent-tf-pros-all-sub.sh asr $conv
-#
+#------------------------------------------------------------
+## Word level prosodic aggregates
+## sge: -N get-pwin-$FEATNAME-$WTYPE-$PREFIX -hold_jid get-pros-norm-$FEATNAME-$PREFIX 
+./inevent-pros-window-sub.sh asrword f0 $conv
+./inevent-pros-window-sub.sh asrword i0 $conv
+
+## Utterance level prosodic aggregates
+## sge: -N get-pwin-$FEATNAME-$WTYPE-$PREFIX -hold_jid get-pros-norm-$FEATNAME-$PREFIX 
+## FEATNAME={f0,i0}, WTYPE=asrutt, PREFIX=$conv 
+./inevent-pros-window-sub.sh asrutt f0 $conv
+./inevent-pros-window-sub.sh asrutt i0 $conv
+
+#------------------------------------------------------------
+## combine term-frequency and prosodic word features
+## sge: -N get-tfpros-$wtype{lex}-$conv -hold_jid get-pwin-i0-${wtype}lex-$prefix,get-pwin-f0-${wtype}lex-$prefix
+## wtype=asr, prefix=$conv 
+./inevent-tf-pros-all-sub.sh asr $conv
+
 ### Get augmented lexical features
 #echo "Name: get-aug-$conv"
 #echo "holds: get-tfpros-asrlex-$conv"
