@@ -1,8 +1,8 @@
 ## Text processing for a new conv
-source("~/scripts/f0basics.r")
-source("~/scripts/read-json.r")
-source("~/scripts/nxt-proc.r")
-source("~/scripts/proc-lex.r")
+source("../rscripts/f0basics.r")
+source("../rscripts/read-json.r")
+source("../rscripts/nxt-proc.r")
+#source("~/scripts/proc-lex.r")
 library(data.table)
 library(plyr)
 library(tm)
@@ -10,7 +10,7 @@ library(tm)
 get.lex.from.json <- function(filename, corpus="inevent", 
 	vidsrc=tolower(gsub("[^A-Z]", "", basename(filename))), 
 	filelist="~/inevent-svn/WPs/WP2/UEDIN_ASR_201407/filenames.txt", 
-	datadir=paste("~/data/", corpus, "/derived/", sep=""), 
+	datadir=paste("~/data/", corpus, "/derived/", sep="") 
 )
 {
         ## Filename data
@@ -71,8 +71,6 @@ get.lex.from.json <- function(filename, corpus="inevent",
 
 	setnames(xwords.dt0, c("id"), c("niteid"))
         write.conv.seg(xwords.dt0, dirname=worddir, segname="asrword")
-
-
 }
 
 ########################################################################
@@ -80,32 +78,28 @@ get.lex.from.json <- function(filename, corpus="inevent",
 args=(commandArgs(TRUE))
 print(args)
 if(length(args)==0){
-	print("No arguments supplied.")
-	print("EXIT")
-        return(1)
+	stop("No arguments supplied. Exiting.")
 } 
 
 filename <- args[1]
 corpus <- args[2]
 info.file <- args[3]
-#idf.conv.file <- args[4] 
-#idf.spk.file <- args[5]
-#all.idf.convs.file <- args[6]
-#pmi.file <- args[6]
 
-datadir <- paste("~/data/", corpus, "/derived/", sep="")
+datadir <- Sys.getenv("DATADIR") 
+if (datadir=="") {
+	print("No DATADIR in environment. Set to default.")
+	datadir <- paste("~/data/", corpus, "/derived/", sep="")
+	print(paste("datadir:", datadir)) 
+} 
+
 if (!file.exists(datadir)) {
 	dir.create(datadir, recursive=T)
-	print(paste("datadir:", datadir))
+	print(paste("dir.create datadir:", datadir))
 }
 
 vidsrc <- tolower(gsub("[^A-Z]", "",  basename(filename)))
 get.lex.from.json(filename, corpus="inevent", vidsrc=vidsrc, 
 	filelist=info.file, 
 	datadir=datadir)  
-#	idf.conv.file=idf.conv.file, 
-#	idf.spk.file=idf.spk.file, 
-	#all.idf.convs.file=all.idf.convs.file, 
-#        pmi.file=pmi.file)
 
-print("=== END ===")
+print("=== END get-new-json ===")

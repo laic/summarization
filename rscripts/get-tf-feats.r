@@ -1,7 +1,7 @@
 ## Text processing for a new conv
-source("~/scripts/f0basics.r")
-source("~/scripts/nxt-proc.r")
-source("~/scripts/proc-lex.r")
+source("../rscripts/f0basics.r")
+source("../rscripts/nxt-proc.r")
+source("../rscripts/proc-lex.r")
 library(data.table)
 library(plyr)
 library(tm)
@@ -10,18 +10,20 @@ get.tf.feats <- function(currconv, corpus="inevent",
 	datadir=paste("~/data/", corpus, "/derived/", sep=""), 
 	idf.conv.file="~/data/misc-derived/all.nxtwords.idf.conv.txt", 
 	idf.spk.file="~/data/misc-derived/all.nxtwords.idf.spk.txt", 
-        pmi.file="~/data/misc-derived/ami.icsi.eda.pmi.txt"
-	word.file.suffix=".raw.asrword.txt"
+        pmi.file="~/data/misc-derived/ami.icsi.eda.pmi.txt",
+	word.file.suffix=".raw.asrword.txt", 
+	wtype="asrword"
 )
 {
-        worddir <- paste(datadir, "/asrword/", sep="")
+	print("=== get words from current conv ===")
+        worddir <- paste(datadir, "/", wtype, "/", sep="")
 	words.dt <- data.table(read.table(paste(worddir, currconv, word.file.suffix, sep=""), header=T)) 
 	
 	## Get the words from the current dataset
 	## We do it like this basically to be able to correct errors on this dataset
 	## We assume that the background idf set won't change      
-	print("=== get words from current dataset ===")
-	dset.word.files <-as.list(list.files(worddir, pattern=paste(word.file.pattern, "$", sep=""), full.names=T))
+	print("=== get all words from current dataset ===")
+	dset.word.files <-as.list(list.files(worddir, pattern=paste(word.file.suffix, "$", sep=""), full.names=T))
 	dset.words.dt0 <- rbindlist(lapply(dset.word.files, function(filename) {
 		curr.dt <- data.table(read.table(filename,header=T))
 		## To match with current format of AMI/ICSI word files
@@ -37,15 +39,15 @@ get.tf.feats <- function(currconv, corpus="inevent",
 
 	## Sanity check
 	if (!(unique(xwords.dt0$conv) %in% dset.words.dt0$conv)) {
-		print(paste(unique(xwords.dt0$conv), "not in dset.words.dt0:"))
-		print(unique(dset.words.dt0$conv))
+		stop(paste(unique(xwords.dt0$conv), "not in dset.words.dt0:"))
 	}
+
 	print("=== word.idf.conv ===")
 	word.idf.conv <- data.table(read.table(file=idf.conv.file, header=T)) 
 	word.idf.spk <- data.table(read.table(file=idf.spk.file, header=T)) 
 
 	print("=== update idf table ===")
-	print(unique(dset.words.dt0$conv))
+	#print(unique(dset.words.dt0$conv))
 	word.idf.conv <- update.idf.conv(dset.words.dt0, word.idf=word.idf.conv, spk=F)
 	word.idf.spk <- update.idf.conv(dset.words.dt0, word.idf=word.idf.spk, spk=T)
 
@@ -81,9 +83,7 @@ get.tf.feats <- function(currconv, corpus="inevent",
 args=(commandArgs(TRUE))
 print(args)
 if(length(args)==0){
-	print("No arguments supplied.")
-	print("EXIT")
-        return(1)
+	stop("No arguments supplied. Exiting...")
 } 
 
 currconv <- args[1]
@@ -92,17 +92,24 @@ idf.conv.file <- args[3]
 idf.spk.file <- args[4]
 pmi.file <- args[5]
 
-datadir <- paste("~/data/", corpus, "/derived/", sep="")
-if (!file.exists(datadir)) {
-	dir.create(datadir, recursive=T)
-	print(paste("datadir:", datadir))
+datadir <- Sys.getenv("DATADIR")
+if (datadir=="") {
+        print("No DATADIR in environment. Set to default.")
+        datadir <- paste("~/data/", corpus, "/derived/", sep="")
+        print(paste("datadir:", datadir))
 }
 
-get.tf.feats(conv, corpus="inevent", 
+if (!file.exists(datadir)) {
+        dir.create(datadir, recursive=T)
+        print(paste("dir.create datadir:", datadir))
+}
+
+get.tf.feats(currconv, corpus=corpus, 
 	datadir=datadir, 
 	idf.conv.file=idf.conv.file, 
 	idf.spk.file=idf.spk.file, 
         pmi.file=pmi.file, 
-	word.file.suffix=".raw.asrword.txt")
+	word.file.suffix=".raw.asrword.txt", 
+	wtype="asrword")
 
 print("=== END: get-tf-feats.r ===")

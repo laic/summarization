@@ -1,7 +1,6 @@
 ## Get ASR output in .json format as specified by the inEvent API
 ## Assume we have a data.table info.dt which gives us the mapping between
 ## ASR .json file, video and wav file names
- 
 library(jsonlite)
 
 read.json <- 
