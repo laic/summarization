@@ -1,7 +1,9 @@
-## Helper functions for calculating lexical features.
-source("~/scripts/f0basics.r")
-source("~/scripts/nxt-proc.r")
-source("~/scripts/ir.r")
+## Helper functions for calculating lexical term-frequency features.
+## Used in: get-tf-feats.r 
+
+source("../rscripts/f0basics.r")
+source("../rscripts/nxt-proc.r")
+source("../rscripts/term-freq.r")
 library(tm)
 
 ## Calculate various term frequency features

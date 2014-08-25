@@ -61,28 +61,18 @@ legendre.eval <- function(x, coeffs, l, xlim=range(x)) {
 	y	
 }
 
-trial <- function() {
-#l <- legendre.polynomials(4, normalized = TRUE) 
-#x <- seq(-1,1,by=0.001)
-#p <- legendre.coeff(x,x^2,l)
-#plot(x,x^2)
-#lines(x, legendre.eval(x,p,l), col="red") 
+legendre.trial <- function() {
+	x <- seq(2,10,by=0.001)
+	y <- sin(2*x)
 
-#x <- seq(0.032,0.272,by=0.001)
-x <- seq(2,10,by=0.001)
-y <- sin(2*x)
+	plot(x,y)
+	l <- legendre.polynomials(3, normalized = TRUE) 
+	g <- legendre.coeff(x,y,l)
+	lines(x, legendre.eval(x,g,l), col="orange") 
 
-plot(x,y)
-l <- legendre.polynomials(3, normalized = TRUE) 
-g <- legendre.coeff(x,y,l)
-lines(x, legendre.eval(x,g,l), col="orange") 
+	g <- legendre.coeff(x,y,l)
+	lines(x, legendre.eval(x,g,l), col="orange") 
 
-g <- legendre.coeff(x,y,l)
-lines(x, legendre.eval(x,g,l), col="orange") 
-
-#v <- legendre.var(x,x^2,c(0,1))
-#print(v)
-#which.J <- legendre.choose.R(x,x^2,c(0,1))
 }
 
 

@@ -1,3 +1,7 @@
+## nxt-proc.r: functions for processing NXT format data and
+## writing out data as flat files.
+## (but some other stuff has crept in it seems)
+
 source("../rscripts/f0basics.r")
 library(data.table)
 library(intervals)
@@ -7,7 +11,6 @@ library(ggplot2)
 
 #--------------------------------------------------------------------------
 # Data cleaning
-
 clean.stem.word <- function(xword, stem=F, remove.morph=F) {
 	xword[grepl("[{}]", xword)] <- ""
         xword <- gsub("\n", "", xword)
@@ -15,12 +18,8 @@ clean.stem.word <- function(xword, stem=F, remove.morph=F) {
         xword <- gsub("[\"=\\.,/`-]", "", xword)
         xword <- gsub("^'$", "", xword)
         xword <- gsub("_", "", xword)
-        #xword <- tolower(xword)
 	## Keep transcribed all caps as all caps, for acronyms e.g. (HMM) 
 	xword[grep("[a-z]", xword)] <- tolower(xword[grep("[a-z]", xword)])	
-        #xword <- gsub("^_([a-z0-9])_", "\\1_", xword)
-        #xword <- gsub("_([a-z0-9])$", "_\\1_", xword)
-        #xword <- gsub("([a-z])_$", toupper("\\1_"), xword)
 
         xword <- gsub("^'kay", "okay", xword)
         xword <- gsub("^'cause", "because", xword)

@@ -1,4 +1,8 @@
-source("~/scripts/nxt-proc.r")
+## term-freq.r: functions for calculating term-fequency features
+## was called ir.r 
+## used by: proc-lex.r (join?) 
+
+source("../rscripts/nxt-proc.r")
 library(data.table)
 library(tm)
 
@@ -230,6 +234,7 @@ get.tfidf.spk <- function(xwords.dt0, word.idf=NULL) {
         return(spk.tf.idf)
 }
 
+get.tfidf.grp <- 
 get.tfidf.conv <- function(xwords.dt0, word.idf=NULL) {
 	## get term frequency
 	conv.tf <- get.tf.conv(xwords.dt0)
@@ -250,159 +255,10 @@ get.tfidf.conv <- function(xwords.dt0, word.idf=NULL) {
         return(conv.tf.idf)
 }
 
-get.tfidf.grp <- get.tfidf.conv 
 
 ######################################################################################
-##---------------------------------------------------------------------------
-## Randoms 
-get.lda.models <- function(dtm, k=100) {
-	SEED <- 2010
-	dtm.ldas <- list(VEM=LDA(dtm, k = k, control = list(seed = SEED)), 	
-		VEM_fixed = LDA(dtm, k = k, 
-			control = list(estimate.alpha = FALSE, seed = SEED)),
-		Gibbs = LDA(dtm, k = k, method = "Gibbs",
-			control = list(seed = SEED, burnin = 1000,
-			thin = 100, iter = 1000)),
-		CTM = CTM(dtm, k = k,
-			control = list(seed = SEED,
-			var = list(tol = 10^-4), em = list(tol = 10^-3))))
-
-	return(dtm.ldas)
-			
-}
-get.query.window <- function(tdocs, tcorpus, simsets, xconv, xstart, xend) {
-	u <- tdocs[conv==xconv][wstart < xstart][wend > xend]	
-	currsims <- simsets[conv==xconv][xstart < endtime][xend > starttime]
-
-	return(list(docs=u, ix=which(names(tcorpus) %in% u[,wid]), sims=currsims))		
-}
-
-read.utep.tag.files <- function(recdir) {
-	filenames <- list.files(recdir, pattern="*.tag.flat")
-	recx <- data.table()
-	for (filename in filenames) {
-		seg.filename <- paste(recdir, filename, sep="/")
-		trans.filename <- gsub("flat","annot",seg.filename) 
-		print(c(seg.filename, trans.filename))
-
-		segs <- data.table(read.delim(seg.filename, header=FALSE))
-		setnames(segs, c("conv", "signal", "seg.id", "offset", "X") )
-		segs$X <- NULL
-		setkey(segs, seg.id, conv)	
-
-		trans <- data.table(read.delim(trans.filename, header=FALSE))
-		setnames(trans, c("conv", "trans.id", "start", "end", "text", "X") )
-		trans$X <- NULL
-		setkey(trans, start, conv)
-
-		u <- segs[trans]
-		setnames(u, c("seg.id", "offset"), c("start.id", "starttime")) 
-		setkey(u, end, conv)
-	
-		v <- segs[u]
-		setnames(v, c("seg.id", "offset"), c("end.id", "endtime")) 
-		v$conv <- substr(v$conv,1, 8)
-
-		recx <- rbind(recx, v[,list(conv,trans.id, signal,starttime,endtime,text)][order(starttime)])
-		
-	}
-
-	return(recx)
-} 
-
-
-read.mlf.files <- function(recdir) {
-	filenames <- list.files(recdir, pattern="*.mlf.melt")
-	recx <- data.table()
-	for (filename in filenames) {
-		currfile <- paste(recdir, filename, sep="/")
-		print(currfile)
-		x <- data.table(read.table(currfile))
-		recx <- rbind(recx, x)
-		
-	}
-	setnames(recx, c("segid","conv","spk","seg.start","seg.end","starttime","endtime","trigram","word"))
-	recx$seg.start <- recx$seg.start/100 
-	recx$seg.end  <- recx$seg.end/100 
-	recx$starttime <- recx$starttime * 10^(-7) + recx$seg.start 
-	recx$endtime <- recx$endtime * 10^(-7) + recx$seg.start 
-
-	return(recx)
-} 
-
-##---------------------------------------------------------------------------
-## Aggregates
-##---------------------------------------------------------------------------
-
-#get.tf.aggs <- function(xdt, windows=NULL, wkey="xid", wsize=60, tstep=30) {
-#        print(unique(xdt$conv))
-#        f0.aggs.spk <- ddply(xdt, c("conv"), get.xint.windows,
-#                        windows=windows, wkey=wkey, wsize=wsize, tstep=tstep, fx=get.tf.aggs.window)
-#        return(data.table(f0.aggs.spk))
-#}
-#
-#get.tf.aggs.window <- function(x,xprops) {
-#        currstart <- unique(x$wstarts)
-#        currend <- unique(x$wends)
-#	#print(c(currstart,currend))
-#        if (length(currend) >1) {
-#                print(x)
-#                print("Non unique end")
-#        }
-#        currconv <- unique(xprops$conv)
-#        currx <- xprops[starttime < currend & endtime > currstart]
-#	if (nrow(currx) > 0) {
-#        	curr.aggs <- currx[,length(conv),by=list(word)]
-#        	xstats <- data.table(wstart=currstart, wend=currend, curr.aggs)
-#	} else {
-#		xstats <- NULL
-#	}
-#
-#
-#        if ("niteid" %in% names(x)) {
-#                xstats <- data.table(niteid=unique(x$niteid), xstats)
-#        }
-#        return(xstats)
-#
-#}
-#
-
-#get.wdocs <- function(xdt, windows=NULL, wkey="xid", wsize=30, tstep=10) {
-#        wdocs <- ddply(xdt, c("conv"), get.xint.windows,
-#                        windows=windows, wkey=wkey, wsize=wsize, tstep=tstep, fx=get.wdocs.window, .parallel=T)
-#        return(data.table(wdocs))
-#}
-#
-#
-#get.wdocs.window <- function(x,xprops) {
-#        currstart <- unique(x$wstarts)
-#        currend <- unique(x$wends)
-#	#print(c(currstart,currend))
-#        if (length(currend) >1) {
-#                print(x)
-#                print("Non unique end")
-#        }
-#        currconv <- unique(xprops$conv)
-#        currx <- xprops[starttime < currend & endtime > currstart]
-#
-#	if (nrow(currx) > 0) {
-#        	curr.aggs <- data.table(doc.len=nrow(currx), doc.unique=currx[,length(unique(clean.word))], 
-#					wrate=nrow(currx)/(currend-currstart),	
-#					text=paste(currx[,word], collapse=" "))
-#	} else {
-#        	curr.aggs <- data.table(doc.len=0, doc.unique=0, wrate=0, text="")
-#	}
-#
-#        xstats <- curr.aggs
-#
-#        if ("niteid" %in% names(x)) {
-#                xstats <- data.table(niteid=unique(x$niteid), xstats)
-#        }
-#        return(xstats)
-#
-#}
-
-
+## Calculate aggregates
+######################################################################################
 
 get.niteid.spk <- function(x) {
 	if (is.factor(x)) {	
@@ -430,7 +286,7 @@ get.tfidf.docs.conv <- function(xdt, windows, spk.only=T) {
         return(wdocs)
 }
 
-
+## This works but its all a bit clunky! Redo 
 get.tfidf.docs.window <- function(x, xprops, spk.only=F) {
         #print("TFIDF")
         currstart <- unique(x$wstarts)
@@ -464,10 +320,6 @@ get.tfidf.docs.window <- function(x, xprops, spk.only=F) {
                 max.tf <- data.table(t(apply(currx[, grep("^t[fp]", featnames), with=F],2,max)))
                 max.su <- data.table(t(apply(currx[, grep("^su", featnames), with=F],2,max)))
                 max.pmi <- data.table(t(apply(currx[, grep("^pmi", featnames), with=F],2,max)))
-                #print(max.tf)
-                #print(max.su)
-                #print(max.pmi)
-
 
                 setnames(max.tf, names(max.tf), gsub("^", "max.", names(max.tf)))
                 setnames(max.su, names(max.su), gsub("^", "max.", names(max.su)))
@@ -527,249 +379,6 @@ get.tfidf.docs.window <- function(x, xprops, spk.only=F) {
       	}
 
         xstats <- data.table(conv=currconv, wstart=currstart, wend=currend, curr.aggs)
-        #print(xstats)
-
-        if ("niteid" %in% names(x)) {
-                xstats <- data.table(niteid=unique(x$niteid), xstats)
-        }
-        #print(xstats[1])
-        #print("HERE")
-        return(xstats)
-
-}
-
-
-#get.tf.docs.window <- function(x,xprops,spk.only=F) {
-#        currstart <- unique(x$wstarts)
-#        currend <- unique(x$wends)
-#        currconv <- unique(xprops$conv)
-#
-#        if (length(currend) >1) {
-#                print(x)
-#                print("Non unique end")
-#        }
-#
-#        currx <- xprops[starttime < currend & endtime > currstart]
-#	featnames <- names(xprops) 
-#
-#	if (nrow(currx) > 0) {
-#		currwords <- currx$id
-#		sum.tf <- data.table(t(colSums(currx[, grep("^tf", featnames), with=F])))	
-#		sum.su <- data.table(t(colSums(currx[, grep("^su", featnames), with=F])))	
-#
-#        	curr.aggs <- data.table(doc.len=length(currwords),
-#			sum.tf, sum.su
-#			) 
-#	} else {
-#
-#		sum.tf <- data.table(t(colSums(xprops[1, grep("^tf", featnames), with=F])*0))	
-#		sum.su <- data.table(t(colSums(xprops[1, grep("^su", featnames), with=F])*0))	
-#
-#        	curr.aggs <- data.table(doc.len=0, 
-#			sum.tf, sum.su
-#			)
-#	}
-#
-#        xstats <- data.table(wstart=currstart, wend=currend, curr.aggs)
-#
-#        if ("niteid" %in% names(x)) {
-#                xstats <- data.table(niteid=unique(x$niteid), xstats)
-#        }
-#        return(xstats)
-#
-#}
-#
-#
-#
-#
-#get.tf.docs <- function(xdt, windows=NULL, wkey="xid", wsize=15, tstep=5, xvars=c("conv")) {
-#        wdocs <- data.table(ddply(xdt, xvars, get.xint.windows,
-#                        windows=windows, wkey=wkey, wsize=wsize, tstep=tstep, fx=get.tf.docs.window))
-#	wdocs <- data.table(wid=wdocs[,paste(conv,wstart,wend,sep="-")], wdocs)	
-#        return(wdocs)
-#}
-#
-
-#get.tfidf.docs <- function(xdt, windows=NULL, wkey="xid", wsize=15, tstep=5, xvars=c("conv"), spk.only=F) {
-#        wdocs <- data.table(ddply(xdt, xvars, get.xint.windows,
-#                        windows=windows, wkey=wkey, wsize=wsize, tstep=tstep, fx=get.tfidf.docs.window, spk.only=spk.only))
-#	wdocs <- data.table(wid=wdocs[,paste(conv,wstart,wend,sep="-")], wdocs)	
-#        return(wdocs)
-#}
-
-#get.wcount.conv <- function(xdt, windows, spk.only=F) {
-#	wdocs <- NULL
-#	
-#	for (i in 1:nrow(windows)) {
-#		curr.wcount <- get.wcount.docs.window(windows[i], xdt, spk.only=spk.only)   
-#		wdocs <- rbind(wdocs, curr.wcount)  
-#	}
-#        return(wdocs)
-#}
-#
-#get.wcount.docs <- function(xdt, windows=NULL, wkey="xid", wsize=15, tstep=5, xvars=c("conv"), spk.only=F) {
-#        wdocs <- data.table(ddply(xdt, xvars, get.xint.windows,
-#                        windows=windows, wkey=wkey, wsize=wsize, tstep=tstep, fx=get.wcount.docs.window, spk.only=spk.only))
-#	wdocs <- data.table(wid=wdocs[,paste(conv,wstart,wend,sep="-")], wdocs)	
-#        return(wdocs)
-#}
-#
-#
-#get.wcount.docs.window <- function(x, xprops, spk.only=F) {
-#        currstart <- unique(x$wstarts)
-#        currend <- unique(x$wends)
-#        currconv <- unique(xprops$conv)
-#	extra.words <- 0  
-#	currid <- unlevel(x$niteid[1])
-#	print(currid)
-#	currspk <- get.niteid.spk(currid)
-#
-#        if (length(currend) >1) {
-#                print(x)
-#                print("Non unique end")
-#        }
-#
-#        currx <- xprops[starttime < currend & endtime > currstart]
-#	featnames <- names(xprops) 
-#
-#	if (nrow(currx) > 0) {
-#		wordspks <- currx[, list(spk=get.niteid.spk(id)), by=list(id)]$spk
-#		extra.words <- nrow(currx[wordspks != currspk])
-#		if (spk.only) {
-#			currx <- currx[wordspks == currspk]
-#		} 
-#
-#		currwords <- currx$id
-#        	curr.aggs <- data.table(doc.len.raw=length(currwords), n.ovl.words.raw=extra.words,
-#			dur.raw=currend-currstart, w.rate=length(currwords)/(currend-currstart)
-#			) 
-#
-#	} else {
-#		curr.aggs <- data.table(doc.len.raw=0, n.ovl.words.raw=0, dur.raw=0, w.rate=0)
-#	}
-#
-#        xstats <- data.table(wstart=currstart, wend=currend, curr.aggs)
-#	#print(xstats)
-#
-#        if ("niteid" %in% names(x)) {
-#                xstats <- data.table(niteid=unique(x$niteid), xstats)
-#        }
-#	#print("HERE")
-#        return(xstats)
-#
-#}
-#
-
-#get.nxtword.docs.window <- function(x,xprops) {
-#        currstart <- unique(x$wstarts)
-#        currend <- unique(x$wends)
-#        currconv <- unique(xprops$conv)
-#
-#        if (length(currend) >1) {
-#                print(x)
-#                print("Non unique end")
-#        }
-#        currx <- xprops[starttime < currend & endtime > currstart]
-#
-#
-#	if (nrow(currx) > 0) {
-#		currwords <- currx$word
-#        	curr.aggs <- data.table(doc.len=length(currwords), doc.unique=length(unique(currwords)), 
-#			sum.tf.idf=sum(currx$tf.idf), sum.idf=sum(currx$idf), 	
-#			text=paste(currwords, collapse=" "))
-#	} else {
-#        	curr.aggs <- data.table(doc.len=0, doc.unique=0, sum.tf.idf=0, sum.idf=0, text="")
-#	}
-#
-#        xstats <- data.table(wstart=currstart, wend=currend, curr.aggs)
-#	#print(xstats)
-#
-#        if ("niteid" %in% names(x)) {
-#                xstats <- data.table(niteid=unique(x$niteid), xstats)
-#        }
-#	#print("HERE")
-#        return(xstats)
-#
-#}
-#
-#
-#get.nxtword.docs <- function(xdt, windows=NULL, wkey="xid", wsize=15, tstep=5, xvars=c("conv")) {
-#        wdocs <- ddply(xdt, xvars, get.xint.windows,
-#                        windows=windows, wkey=wkey, wsize=wsize, tstep=tstep, fx=get.nxtword.docs.window)
-#        return(data.table(wdocs))
-#}
-
-
-############################################################################
-# Some functions for the utep Mediaeval data
-############################################################################
-
-get.tdocs.window <- function(x,xprops) {
-        currstart <- unique(x$wstarts)
-        currend <- unique(x$wends)
-        currconv <- unique(xprops$conv)
-	#print(c(currconv, currstart,currend))
-
-        if (length(currend) >1) {
-                print(x)
-                print("Non unique end")
-        }
-        currx <- xprops[starttime < currend & endtime > currstart]
-	#print(currx)	
-
-
-	if (nrow(currx) > 0) {
-		currwords <- unlist(strsplit(currx[, unlevel(text)], " "))	
-		#print(currwords)
-        	curr.aggs <- data.table(doc.len=length(currwords), doc.unique=length(unique(currwords)), 
-			text=paste(currx[,text], collapse=" "))
-	} else {
-        	curr.aggs <- data.table(doc.len=0, doc.unique=0, text="")
-	}
-
-        xstats <- data.table(wstart=currstart, wend=currend, curr.aggs)
-	#print(xstats)
-
-        if ("niteid" %in% names(x)) {
-                xstats <- data.table(niteid=unique(x$niteid), xstats)
-        }
-	#print("HERE")
-        return(xstats)
-
-}
-
-
-get.tdocs <- function(xdt, windows=NULL, wkey="xid", wsize=60, tstep=20) {
-        wdocs <- ddply(xdt, c("conv"), get.xint.windows,
-                        windows=windows, wkey=wkey, wsize=wsize, tstep=tstep, fx=get.tdocs.window)
-        return(data.table(wdocs))
-}
-
-
-
-get.simsets.window <- function(x,xprops) {
-        currstart <- unique(x$wstarts)
-        currend <- unique(x$wends)
-        currconv <- unique(xprops$conv)
-	#print(c(currconv, currstart,currend))
-
-        if (length(currend) >1) {
-                print(x)
-                print("Non unique end")
-        }
-        currx <- xprops[starttime < currend & endtime > currstart]
-	#print(currx)	
-
-
-	if (nrow(currx) > 0) {
-		#print(currwords)
-        	curr.aggs <- data.table(simset.len=nrow(currx),
-			tag=currx[,unlevel(tag)])
-	} else {
-        	curr.aggs <- data.table(simset.len=0, tag="")
-	}
-
-        xstats <- data.table(wstart=currstart, wend=currend, curr.aggs)
 
         if ("niteid" %in% names(x)) {
                 xstats <- data.table(niteid=unique(x$niteid), xstats)
@@ -778,50 +387,6 @@ get.simsets.window <- function(x,xprops) {
 }
 
 
-get.simsets.all <- function(xdt, windows=NULL, wkey="xid", wsize=60, tstep=20) {
-        wdocs <- data.table(ddply(xdt, c("conv"), get.xint.windows,
-                        windows=windows, wkey=wkey, wsize=wsize, tstep=tstep, fx=get.simsets.window))
-	wdocs <- data.table(wid=wdocs[,paste(conv,wstart,wend,sep="-")], wdocs)
-        return(wdocs)
-}
 
 
-
-main.utep <- function() {
-
-	## Edin-ASR
-	transfiles <- read.mlf.files("./utep")
-	transfiles <- transfiles[!grep("^<", word)]
-
-	## Utep manual transcripts
-	trans.utep <- read.utep.tag.files("./utep/all-transcripts")
-	trans.utep <- trans.utep[!is.na(endtime)]
-	tdocs <- get.tdocs(trans.utep)
-
-
-	tcorpus <- Corpus(VectorSource(tdocs[doc.len > 0,text]))
-	names(tcorpus) <- tdocs[doc.len > 0,paste(conv,wstart,wend, sep="-")]
-	tcorpus <- tm_map(tcorpus, function(x) {gsub("[?]", " ? ", x)})
-	tcorpus <- tm_map(tcorpus, function(x) {gsub("[!]", " ! ", x)})
-	tcorpus <- tm_map(tcorpus, stripWhitespace)
-	tcorpus <- tm_map(tcorpus, tolower)
-	tcorpus <- tm_map(tcorpus, function(x) {gsub("[=\\.,/`-]", "", x)})
-	tcorpus <- tm_map(tcorpus, stemDocument, language="en")
-	tdm <- TermDocumentMatrix(tcorpus)	
-	tdm2 <- TermDocumentMatrix(tcorpus, control=list(weighting=function(x){weightTfIdf(x, normalize=F)}))	
-
-	dtm <- DocumentTermMatrix(tcorpus, 	
-		control = list(stopwords = TRUE, minWordLength = 3,
-		removeNumbers = TRUE))
-
-#
-	sapply(dtm.ldas, function(x) {
-		mean(apply(posterior(x)$topics, 1 , function(z) - sum(z * log(z))))
-			 } )
-
-	
-	simsets <- data.table(read.delim("utep/all-simsets-clean.txt.melt", header=F))
-	setnames(simsets, c("V1","tag","eaf","starttime","endtime"))	
-
-}
 
