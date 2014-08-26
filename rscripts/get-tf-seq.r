@@ -69,13 +69,17 @@ znorm.var.by.window <- function(x, var.name="mean.normF0", wpercent=0.25) {
 
 ## Collate the word level features specified by var.names with context if specified.
 collate.tf.feats <- function(xprops, var.names, prev.window=0, next.window=0) {
+	print("===collate.tf.feats")
 	x0 <- xprops[order(wstart)]
 	currconv <- unique(x0$conv)	 
-	print(x0)
+	print(currconv)
+	print(var.names)
+	#print(names(x0))
+
 
 	## Calculate silence separately
 	x <- x0[, var.names[var.names != "silence"], with=F] 
-	
+
 	if (!("link.eda" %in% names(x0))) {
 		x0 <- data.table(link.eda=FALSE, x0) 
 	}
@@ -140,11 +144,15 @@ collate.tf.feats <- function(xprops, var.names, prev.window=0, next.window=0) {
 
 		## For each feature type (variable) get difference between 
 		## context values and current (target) value.
-		
+
+		if (is.factor(curr.vals$variable)) {
+			curr.vals$variable <- unlevel(curr.vals$variable)
+		}
 		if ((prev.window + next.window) > 0) {
 			delta.vals <- curr.vals[,{
-				curr.var <- unique(unlevel(variable))  
-				curr.tval <- target.vals[[curr.var]][1]		
+			#	print(paste("***variable:", variable))
+				curr.tval <- target.vals[[variable]][1]		
+			#	print(paste("*** curr.tval ****", curr.tval))	
 				if (is.na(curr.tval)) {
 					curr.tval <- 0
 				}
@@ -169,7 +177,7 @@ collate.tf.feats <- function(xprops, var.names, prev.window=0, next.window=0) {
 	vals <- data.table(vals)
 	setnames(vals, curr.names)
 
-	
+	print("***return vals***")	
 	return(vals)
 
 }
@@ -335,6 +343,7 @@ if(length(args)==0){
 	## Get feature sequences	
 	print("collate.tf.feats")
 	x.tf <- unlist.df(lapply(x.tf.spk.list, collate.tf.feats, var.names=curr.var.names, prev.window=prev.window, next.window=next.window))
+	print("HERE")	
 
 	## Add suffix for windowed z-score features and grab their sequences 
 #	zvar.names <- paste(curr.var.names, ".zw", sep="")
@@ -385,15 +394,13 @@ if(length(args)==0){
 #	write.table(z.tf, file=zoutfile.txt, row.names=F, quote=F)	
 
 	##  Dump to one directory.
-	## outfile.all <- paste(segsdir, "/all/", currconv, ".", var.id, "-", prev.window, ".", next.window, ".all.txt", sep="")		
-	##print(outfile.all)
-	##write.table(x.tf, file=outfile.all, row.names=F, quote=F)	
+	outfile.all <- paste(segsdir, "/", featname, "/", currconv, ".", var.id, "-", prev.window, ".", next.window, ".all.txt", sep="")		
+	print(outfile.all)
+	write.table(x.tf, file=outfile.all, row.names=F, quote=F)	
 
-#	zoutfile.all <- paste(segsdir, "/all/", currconv, ".", var.id, ".", prev.window, ".", next.window, ".all.zw.txt", sep="")
+#	zoutfile.all <- paste(segsdir, "/", featname ,"/", currconv, ".", var.id, ".", prev.window, ".", next.window, ".all.zw.txt", sep="")
 #	write.table(z.tf, file=zoutfile.all, row.names=F, quote=F)	
 
 }
-
-
 print("END")
 

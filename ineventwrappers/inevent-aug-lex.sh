@@ -96,32 +96,8 @@ fi
 includehead=F
 Rscript $RSCRIPTS/get-tf-seq.r $conv $lexname $segsdir $spkonly $pcontext $ncontext $varname $includehead $corpus $fsuffix $featnames
 
-## HERE!!!!
- 
-#cp $testsetdir/$featname.txt  $nnrawdir/$featname-eval.txt
-
 cp $testsetdir/$featname.txt  $testsetdir/$featname-eval.txt
 
-## Put data in a format good for theano/MLP   
-## This is a bit superfluous in this case, we might as well just directly read in 
-## when applying the mlp
-
-#echo $featname $nnrawdir $corpus $skip
-
-#if [ -e $nnrawdir/$featname.pkl.gz ]
-#then
-#        rm $nnrawdir/$featname.pkl.gz
-#fi
-
-#echo "proc vec"
-#python ~/scripts/proc_vecs.py $featname $nnrawdir $skip $testonly
-
-#echo "gzip"
-#echo $nnrawdir/$featname.pkl
-#
-#gzip $nnrawdir/$featname.pkl
-#cp $nnrawdir/$featname.pkl.gz $mlpdatadir
-#
 ##----------------------------------------------------------------
 ## Apply the ami model
 ##----------------------------------------------------------------

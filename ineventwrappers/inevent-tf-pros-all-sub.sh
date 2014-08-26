@@ -25,4 +25,4 @@ f0wordjid=get-pwin-f0-${wtype}word-$conv
 echo "Name: get-tfpros-${wtype}lex-$conv"
 echo "holds: $i0wordjid $f0wordjid"
 
-qsub -N get-tfpros-${wtype}lex-$conv -hold_jid $i0wordjid,$f0wordjid  $SGEDIR/get-ed-tf-pros-all.sh $conv $segsdir $rmstop $wtype
+qsub -N get-tfpros-${wtype}lex-$conv -hold_jid get-tf-feats-$conv,$i0wordjid,$f0wordjid  $SGEDIR/get-ed-tf-pros-all.sh $conv $segsdir $rmstop $wtype
