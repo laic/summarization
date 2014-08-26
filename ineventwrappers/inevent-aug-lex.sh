@@ -96,25 +96,26 @@ fi
 includehead=F
 Rscript $RSCRIPTS/get-tf-seq.r $conv $lexname $segsdir $spkonly $pcontext $ncontext $varname $includehead $corpus $fsuffix $featnames
 
-### HERE!!!!
-# 
-#./get-tf-seq-clean.sh $pcontext $ncontext $varname $segsdir $normtype
+## HERE!!!!
+ 
 #cp $testsetdir/$featname.txt  $nnrawdir/$featname-eval.txt
-#
-### Put data in a format good for theano/MLP   
-### This is a bit superfluous in this case, we might as well just directly read in 
-### when applying the mlp
-#
+
+cp $testsetdir/$featname.txt  $testsetdir/$featname-eval.txt
+
+## Put data in a format good for theano/MLP   
+## This is a bit superfluous in this case, we might as well just directly read in 
+## when applying the mlp
+
 #echo $featname $nnrawdir $corpus $skip
-#
+
 #if [ -e $nnrawdir/$featname.pkl.gz ]
 #then
 #        rm $nnrawdir/$featname.pkl.gz
 #fi
-#
+
 #echo "proc vec"
 #python ~/scripts/proc_vecs.py $featname $nnrawdir $skip $testonly
-#
+
 #echo "gzip"
 #echo $nnrawdir/$featname.pkl
 #
@@ -124,38 +125,41 @@ Rscript $RSCRIPTS/get-tf-seq.r $conv $lexname $segsdir $spkonly $pcontext $ncont
 ##----------------------------------------------------------------
 ## Apply the ami model
 ##----------------------------------------------------------------
-#echo "--- Apply the ami model ---"
-#
-## trained model stem
-#trainmlpdir="/exports/home/clai/nn/output/mlp/"
-#traincorpus="ami"
-#trainpkl=${traincorpus}_mlp_${varname}-${pcontext}.${ncontext}.${normtype}
-#echo $trainpkl
-#
-## get the best performing mlp model parameters from dev experiments 
-#trainmlpfile=`head -n1 ${trainmlpdir}/plain/${trainpkl}.auroc.txt | cut -d " " -f 2 | sed s/.dev.txt//g`
-#scale=`head -n1 ${trainmlpdir}/plain/${trainpkl}.auroc.txt | cut -d " " -f 4`
-#hsize=$(($n_in * $scale))
-#
-#model=$trainmlpdir/params-$trainmlpfile
-#
-#fset=$featname
-#
-#echo $model
-#echo $fset $scale $hsize $testonly
-#
-#./get-mlp.sh $fset $n_in $corpus $testonly $model $hsize
-#
+echo "--- Apply the ami model ---"
+
+# trained model stem
+trainmlpdir="/exports/home/clai/nn/output/mlp/"
+traincorpus="ami"
+trainpkl=${traincorpus}_mlp_${varname}-${pcontext}.${ncontext}.${normtype}
+echo $trainpkl
+
+# get the best performing mlp model parameters from dev experiments 
+trainmlpfile=`head -n1 ${trainmlpdir}/plain/${trainpkl}.auroc.txt | cut -d " " -f 2 | sed s/.dev.txt//g`
+scale=`head -n1 ${trainmlpdir}/plain/${trainpkl}.auroc.txt | cut -d " " -f 4`
+
+hsize=$(($n_in * $scale))
+hname=`echo $hsize | tr " " "_"`
+
+fset=$featname
+
+model=$trainmlpdir/params-$trainmlpfile
+infile=$testsetdir/$featname-eval.txt
+outfile=$nnrawdir/${corpus}_mlp_${featname}_${n_in}-$hname.pkl
+
+echo $infile $n_in $corpus $testonly $model $hsize
+./apply-mlp.sh $infile $model $n_in $hsize $outfile $testonly
+
 ##-----------------------------------------------------------------------
 ## get flat file version of mlp output
-#teststem=${corpus}_mlp_${fset}
-#echo $teststem
+teststem=${corpus}_mlp_${fset}
+echo $teststem
 #./get-mlp-out.sh $teststem $n_in $segsdir "$scale"
 #
-## Join back with identifiers, niteid etc.
-#testpkl=${teststem}_${n_in}-${hsize}.pkl
-#Rscript ~/clai/scripts/get-word-ids.r $testpkl.eval.txt $segsdir $mlpprobdir $lextype 
-#
+
+# Join back with identifiers, niteid etc.
+testpkl=${teststem}_${n_in}-${hsize}.pkl
+Rscript $RSCRIPTS/get-word-ids.r $testpkl.eval.txt $segsdir $mlpprobdir $lextype 
+
 ##-----------------------------------------------------------------------
 ## get DA level features 
 #echo "--- get word da features ---"

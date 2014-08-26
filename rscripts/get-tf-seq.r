@@ -1,4 +1,5 @@
 #!/usr/bin/Rscript --vanilla --slave
+
 source("../rscripts/nxt-proc.r")
 
 library(data.table)

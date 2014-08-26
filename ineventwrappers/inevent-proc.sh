@@ -116,7 +116,8 @@ qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-fe
 ## Get augmented lexical features
 echo "Name: get-aug-$conv"
 echo "holds: get-tfpros-asrlex-$conv"
-qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv ./get-ed-aug-lex.sh $conv
+
+qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv $SGESCRIPTS/get-ed-aug-lex.sh $conv
 
 ### Utterance level prosody delta features 
 ## -N get-tfseq-$featname-$conv -hold_jid get-pwin-$featname-asrutt-$conv
