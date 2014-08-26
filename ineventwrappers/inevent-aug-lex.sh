@@ -144,21 +144,23 @@ fset=$featname
 
 model=$trainmlpdir/params-$trainmlpfile
 infile=$testsetdir/$featname-eval.txt
-outfile=$nnrawdir/${corpus}_mlp_${featname}_${n_in}-$hname.pkl
+outfile=$testsetdir/${corpus}_mlp_${featname}_${n_in}-$hname.prob
 
 echo $infile $n_in $corpus $testonly $model $hsize
 ./apply-mlp.sh $infile $model $n_in $hsize $outfile $testonly
 
 ##-----------------------------------------------------------------------
 ## get flat file version of mlp output
-teststem=${corpus}_mlp_${fset}
 echo $teststem
 #./get-mlp-out.sh $teststem $n_in $segsdir "$scale"
 #
 
 # Join back with identifiers, niteid etc.
-testpkl=${teststem}_${n_in}-${hsize}.pkl
-Rscript $RSCRIPTS/get-word-ids.r $testpkl.eval.txt $segsdir $mlpprobdir $lextype 
+probfname=$testsetdir/${corpus}_mlp_${fset}_${n_in}-${hsize}.prob.eval.txt
+idfname=$testsetdir/$featname-eval.txt
+lexdir=$segsdir/${lextype}lex/
+Rscript $RSCRIPTS/get-word-ids.r $probfname $idfname $lexdir
+
 
 ##-----------------------------------------------------------------------
 ## get DA level features 
