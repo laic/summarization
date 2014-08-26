@@ -11,9 +11,9 @@ varname=$2
 featnames=$3
 
 ## inevent  vars 
+corpus=inevent
 segsdir=$HOME/data/inevent/derived/segs/
 hashead=F
-corpus=inevent
 lexname=asrlex
 spkonly=F
 fsuffix=".tf.allpros.txt"
@@ -162,16 +162,16 @@ lexdir=$segsdir/${lextype}lex/
 Rscript $RSCRIPTS/get-word-ids.r $probfname $idfname $lexdir
 
 
-##-----------------------------------------------------------------------
-## get DA level features 
-#echo "--- get word da features ---"
-#fset_layer=${fset}_${n_in}-${hsize}
-#wtype=asrutt
-#SPKONLY=T
-#
-#echo ${fset_layer}
-#Rscript ~/scripts/get-tf-window.r $conv $lexname $segsdir $wtype $SPKONLY ${fset_layer} #> $PROSPATH/$feat/$conv.log  
-#
-#echo "DONE"
-#exit 0
-#
+#-----------------------------------------------------------------------
+# get DA level features 
+echo "--- get word da features ---"
+fset_layer=${fset}_${n_in}-${hsize}
+windowtype=asrutt
+SPKONLY=T
+
+echo ${fset_layer}
+Rscript $RSCRIPTS/get-tf-window.r $conv $lexname $segsdir $windowtype $SPKONLY ${fset_layer} 
+
+echo "DONE"
+exit 0
+
