@@ -3,6 +3,7 @@
 #----------------------------------------------------
 NNDIR=../nn/
 RSCRIPTS=../rscripts/
+SGEDIR=../sgescripts/
 
 ## Current conv
 conv=$1
@@ -95,76 +96,76 @@ fi
 includehead=F
 Rscript $RSCRIPTS/get-tf-seq.r $conv $lexname $segsdir $spkonly $pcontext $ncontext $varname $includehead $corpus $fsuffix $featnames
 
-## HERE!!!!
- 
-./get-tf-seq-clean.sh $pcontext $ncontext $varname $segsdir $normtype
-cp $testsetdir/$featname.txt  $nnrawdir/$featname-eval.txt
-
-## Put data in a format good for theano/MLP   
-## This is a bit superfluous in this case, we might as well just directly read in 
-## when applying the mlp
-
-echo $featname $nnrawdir $corpus $skip
-
-if [ -e $nnrawdir/$featname.pkl.gz ]
-then
-        rm $nnrawdir/$featname.pkl.gz
-fi
-
-echo "proc vec"
-python ~/scripts/proc_vecs.py $featname $nnrawdir $skip $testonly
-
-echo "gzip"
-echo $nnrawdir/$featname.pkl
-
-gzip $nnrawdir/$featname.pkl
-cp $nnrawdir/$featname.pkl.gz $mlpdatadir
-
-#----------------------------------------------------------------
-# Apply the ami model
-#----------------------------------------------------------------
-echo "--- Apply the ami model ---"
-
-# trained model stem
-trainmlpdir="/exports/home/clai/nn/output/mlp/"
-traincorpus="ami"
-trainpkl=${traincorpus}_mlp_${varname}-${pcontext}.${ncontext}.${normtype}
-echo $trainpkl
-
-# get the best performing mlp model parameters from dev experiments 
-trainmlpfile=`head -n1 ${trainmlpdir}/plain/${trainpkl}.auroc.txt | cut -d " " -f 2 | sed s/.dev.txt//g`
-scale=`head -n1 ${trainmlpdir}/plain/${trainpkl}.auroc.txt | cut -d " " -f 4`
-hsize=$(($n_in * $scale))
-
-model=$trainmlpdir/params-$trainmlpfile
-
-fset=$featname
-
-echo $model
-echo $fset $scale $hsize $testonly
-
-./get-mlp.sh $fset $n_in $corpus $testonly $model $hsize
-
-#-----------------------------------------------------------------------
-# get flat file version of mlp output
-teststem=${corpus}_mlp_${fset}
-echo $teststem
-./get-mlp-out.sh $teststem $n_in $segsdir "$scale"
-
-# Join back with identifiers, niteid etc.
-testpkl=${teststem}_${n_in}-${hsize}.pkl
-Rscript ~/clai/scripts/get-word-ids.r $testpkl.eval.txt $segsdir $mlpprobdir $lextype 
-
-#-----------------------------------------------------------------------
-# get DA level features 
-echo "--- get word da features ---"
-fset_layer=${fset}_${n_in}-${hsize}
-wtype=asrutt
-SPKONLY=T
-
-echo ${fset_layer}
-Rscript ~/scripts/get-tf-window.r $conv $lexname $segsdir $wtype $SPKONLY ${fset_layer} #> $PROSPATH/$feat/$conv.log  
-
-echo "DONE"
-exit 0
-
+### HERE!!!!
+# 
+#./get-tf-seq-clean.sh $pcontext $ncontext $varname $segsdir $normtype
+#cp $testsetdir/$featname.txt  $nnrawdir/$featname-eval.txt
+#
+### Put data in a format good for theano/MLP   
+### This is a bit superfluous in this case, we might as well just directly read in 
+### when applying the mlp
+#
+#echo $featname $nnrawdir $corpus $skip
+#
+#if [ -e $nnrawdir/$featname.pkl.gz ]
+#then
+#        rm $nnrawdir/$featname.pkl.gz
+#fi
+#
+#echo "proc vec"
+#python ~/scripts/proc_vecs.py $featname $nnrawdir $skip $testonly
+#
+#echo "gzip"
+#echo $nnrawdir/$featname.pkl
+#
+#gzip $nnrawdir/$featname.pkl
+#cp $nnrawdir/$featname.pkl.gz $mlpdatadir
+#
+##----------------------------------------------------------------
+## Apply the ami model
+##----------------------------------------------------------------
+#echo "--- Apply the ami model ---"
+#
+## trained model stem
+#trainmlpdir="/exports/home/clai/nn/output/mlp/"
+#traincorpus="ami"
+#trainpkl=${traincorpus}_mlp_${varname}-${pcontext}.${ncontext}.${normtype}
+#echo $trainpkl
+#
+## get the best performing mlp model parameters from dev experiments 
+#trainmlpfile=`head -n1 ${trainmlpdir}/plain/${trainpkl}.auroc.txt | cut -d " " -f 2 | sed s/.dev.txt//g`
+#scale=`head -n1 ${trainmlpdir}/plain/${trainpkl}.auroc.txt | cut -d " " -f 4`
+#hsize=$(($n_in * $scale))
+#
+#model=$trainmlpdir/params-$trainmlpfile
+#
+#fset=$featname
+#
+#echo $model
+#echo $fset $scale $hsize $testonly
+#
+#./get-mlp.sh $fset $n_in $corpus $testonly $model $hsize
+#
+##-----------------------------------------------------------------------
+## get flat file version of mlp output
+#teststem=${corpus}_mlp_${fset}
+#echo $teststem
+#./get-mlp-out.sh $teststem $n_in $segsdir "$scale"
+#
+## Join back with identifiers, niteid etc.
+#testpkl=${teststem}_${n_in}-${hsize}.pkl
+#Rscript ~/clai/scripts/get-word-ids.r $testpkl.eval.txt $segsdir $mlpprobdir $lextype 
+#
+##-----------------------------------------------------------------------
+## get DA level features 
+#echo "--- get word da features ---"
+#fset_layer=${fset}_${n_in}-${hsize}
+#wtype=asrutt
+#SPKONLY=T
+#
+#echo ${fset_layer}
+#Rscript ~/scripts/get-tf-window.r $conv $lexname $segsdir $wtype $SPKONLY ${fset_layer} #> $PROSPATH/$feat/$conv.log  
+#
+#echo "DONE"
+#exit 0
+#
