@@ -1111,7 +1111,8 @@ get.da.text <- function(group.fx0, da.word.file, outfile="./da.word.txt", from.n
 		}
 	} else { ## It should be a dump of the json word.dt
 		da.word <- data.table(read.table(da.word.file, header=T))
-		setnames(da.word, c("word.id", "seg.id", "wordId"), c("wid", "da.id", "word"))		
+		#setnames(da.word, c("word.id", "seg.id", "wordId"), c("wid", "da.id", "word"))		
+		setnames(da.word, c("niteid", "seg.id", "word"), c("wid", "da.id", "word"))		
 	}
 
 	# Remove extra spaces, punctuation etc and join words into DA strings
