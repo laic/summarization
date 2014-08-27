@@ -60,16 +60,12 @@ get.lex.from.json <- function(filename, corpus="inevent",
                 print(worddir)
         }
 
-	write.features.by.conv(words.dt, dirname=worddir, fsuffix=".raw.asrword", plain.txt=F)
-        #ddply(words.dt, .(conv), function(x) {
-        #        write.table(x, file=paste(worddir, unique(x$conv), ".raw.asrword.txt", sep=""))
-        #        })
-	
-        xwords.dt0 <- words.dt[,list(corpora=corpus,id=word.id, conv=conv, maxtime=max(wordEnd, na.rm=T), spk=speakerId,
-                fname=longconv, .id="w", starttime=wordStart, endtime=wordEnd, word=wordId, 
-		clean.word=clean.stem.word(tolower(wordId), stem=T, remove.morph=T))]
 
-	setnames(xwords.dt0, c("id"), c("niteid"))
+	setnames(words.dt, c("word.id","startTime","endTime","speakerId","wordStart","wordEnd","wordId"),
+		c("niteid","starttime","endtime","spk","wstart","wend","word"))
+	write.features.by.conv(words.dt, dirname=worddir, fsuffix=".raw.asrword", plain.txt=F)
+	
+        xwords.dt0 <- words.dt[,list(niteid, conv, spk, starttime=wstart, endtime=wend)]
         write.conv.seg(xwords.dt0, dirname=worddir, segname="asrword")
 }
 

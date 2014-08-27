@@ -18,6 +18,7 @@ get.tf.feats <- function(currconv, corpus="inevent",
 	print("=== get words from current conv ===")
         worddir <- paste(datadir, "/", wtype, "/", sep="")
 	words.dt <- data.table(read.table(paste(worddir, currconv, word.file.suffix, sep=""), header=T)) 
+
 	
 	## Get the words from the current dataset
 	## We do it like this basically to be able to correct errors on this dataset
@@ -33,9 +34,13 @@ get.tf.feats <- function(currconv, corpus="inevent",
 		return(curr.dt0)
 	}))
 
-        xwords.dt0 <- words.dt[,list(corpora=corpus,niteid=word.id, conv=conv, maxtime=max(wordEnd, na.rm=T), spk=speakerId,
-                fname=longconv, .id="w", starttime=wordStart, endtime=wordEnd, word=wordId, 
-		clean.word=clean.stem.word(tolower(wordId), stem=T, remove.morph=T))]
+        xwords.dt0 <- words.dt[,list(corpora=corpus,niteid=niteid, conv=conv, maxtime=max(wordEnd, na.rm=T), spk=spk,
+                fname=longconv, .id="w", starttime=wstart, endtime=wend, word=word, 
+		clean.word=clean.stem.word(tolower(word), stem=T, remove.morph=T))]
+
+#        xwords.dt0 <- words.dt[,list(corpora=corpus,niteid=word.id, conv=conv, maxtime=max(wordEnd, na.rm=T), spk=speakerId,
+#                fname=longconv, .id="w", starttime=wordStart, endtime=wordEnd, word=wordId, 
+#		clean.word=clean.stem.word(tolower(wordId), stem=T, remove.morph=T))]
 
 	## Sanity check
 	if (!(unique(xwords.dt0$conv) %in% dset.words.dt0$conv)) {
