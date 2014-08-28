@@ -1,0 +1,18 @@
+#!/bin/csh -f
+
+
+set PROGS = (Treebank_tokenization.sed \
+             mxpost \
+             mxpost.jar \
+             mxterminator \
+             tagger.project \
+             trainmxpost \
+             trainmxterminator )
+
+
+set GLOBAL_BIN = /group/contrib/nlp-speech/bin
+
+cd $GLOBAL_BIN
+foreach f ($PROGS)
+    rm $f
+end

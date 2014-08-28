@@ -1332,8 +1332,14 @@ apply.fset.mods <- function(group.fx0, fsetname,
 ## --------------------------------------------------------------------------
 ## select.quotes: 
 ## utt.probs: probs assigned to utterances/DAs from the Extractive summarizer 
+
+get.utt.probs <- function() {
+	utt.probs <- data.table(read.table("~/data/inevent/derived/segs/reval/ami.group.fx0.aug.wsw/TED0069.tf.pros_pros.eval.txt", header=T))		
+	utt.probs <- data.table(read.table("~/data/inevent/derived/segs/reval/ami.group.fx0.aug.wsw/TED1090.tf.pros_pros.eval.txt", header=T))		
+	utt.probs <- data.table(read.table("~/data/inevent/derived/segs/reval/ami.group.fx0.aug.wsw/KLEdjangocon2012003.tf.pros_pros.eval.txt", header=T))		
+}
+
 select.quotes <- function(utt.probs) {
-	#utt.probs <- data.table(read.table("~/data/inevent/derived/segs/reval/ami.group.fx0.aug.wsw/TED0069.tf.pros_pros.eval.txt", header=T))		
 	qs <- utt.probs[,quantile(logit.val, probs=c(0.25,0.5,0.75, 0.95, 1))]
 	qs <- data.table(quantile=gsub("%", "", names(qs)), qs)
 	utt.sel <- qs[, utt.probs[logit.val <= qs][order(logit.val, decreasing=T)][1], by=quantile]

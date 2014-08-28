@@ -1,0 +1,70 @@
+<!--#include virtual="/ssi/doctype.inc"--><TITLE>MXPOST</TITLE>
+<!--#include virtual="/cgi-bin/metabase"-->
+<!--#include virtual="/ssi/header.inc"-->
+
+<h1>MXPOST</h1>
+
+<p>
+MXPOST is a JAVA (JDK 1.1) implementation of the part-of-speech tagger described in:
+
+<p><A
+HREF="http://www.inf.ed.ac.uk/resources/nlp/local_doc/mxpost_doc.pdf">
+   Adwait Ratnaparkhi. <EM>A Maximum Entropy Part-Of-Speech Tagger.</EM>
+   In Proceedings of the Empirical Methods in Natural Language
+   Processing Conference, May 17-18, 1996. University of Pennsylvania</A>
+(it is no longer available at the original location
+http://www.cis.upenn.edu/~adwait/papers/tagger.ps, I found it at <A
+HREF="http://citeseer.ist.psu.edu/152720.html">http://citeseer.ist.psu.edu/152720.html</A>).
+
+Adwait's <A HREF="http://www.inf.ed.ac.uk/resources/nlp/local_doc/mxpost_thesis.pdf">
+thesis</A> and two <A
+HREF="http://www.inf.ed.ac.uk/resources/nlp/local_doc/mxpostfaq.pdf">FAQs</A>
+
+<p>
+USERS MUST ABIDE BY THE LICENSE INCLUDED WITH
+THIS DISTRIBUTION.
+
+<p>
+MXPOST is copyright (c) 1997 Adwait Ratnaparkhi
+
+<P>
+<center><h1>INSTRUCTIONS FOR USE</h1></center>
+
+<p>To use:
+<OL>
+
+  <LI> Type: <code>mxpost projectdir < wordfile</code>
+       <p>where <code>projectdir</code> contains the files constituting
+       the model and <code>wordfile</code> contains one sentence per line.
+
+       <p>An example of a "project directory" is
+        <code> /group/contrib/nlp-speech/src/mxpost/tagger.project </code>,
+       it  contains a model trained
+       from sections 0 through 18 of the Penn Treebank Wall St. Journal
+       corpus.
+       <p>The sentences in <code>wordfile</code> must be tokenized according to
+Penn Treebank conventions,
+       e.g., "The stock didn't rise $5." should be "The stock did n't rise $ 5 .
+
+       <p> You may want to use the script <code>Treebank_tokenization.sed</code> 
+       for that, which is at the same location as <code>mxpost</code>.
+</OL>
+
+<p>To train a new model:
+<OL>
+  <LI> Edit your CLASSPATH variable to include the directory mxpost.jar
+       (as in script "mxpost").
+  <LI> Create an empty project directory
+  <LI> Type: <p><code>trainmxpost projectdir traindata</code>
+       <p>where <code>projectdir</code> is the newly created project directory,
+       and where <code>traindata</code> contains one sentence per line, where
+       each sentence has the format:
+       <p><code>word1_tag1 word2_tag2 word3_tag3 ... word4_tag4</code> 
+</OL>
+
+
+<!--#include virtual="/cgi-bin/locationbar"-->
+<!--#include virtual="/ssi/footer.inc"-->
+
+
+
