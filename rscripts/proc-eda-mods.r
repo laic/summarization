@@ -1329,6 +1329,55 @@ apply.fset.mods <- function(group.fx0, fsetname,
         })
 }
 
+
+conv.conf <- function () {
+seg.prob.file="~/data/inevent/derived/segs/reval/ami.group.fx0.aug.wsw/TED0069.tf.pros_pros.eval.txt"
+seg.word.file="~/data/inevent/derived/segs/asrword/TED0069.raw.asrword.txt"
+
+seg.prob.file="~/data/inevent/derived/segs/reval/ami.group.fx0.aug.wsw/TED0227.tf.pros_pros.eval.txt"
+seg.word.file="~/data/inevent/derived/segs/asrword/TED0227.raw.asrword.txt"
+}
+seg.prob.file="~/data/inevent/derived/segs/reval/ami.group.fx0.aug.wsw/KLEdjangocon2012003.tf.pros_pros.eval.txt"
+seg.word.file="~/data/inevent/derived/segs/asrword/KLEdjangocon2012003.raw.asrword.txt"
+
+conv="TED1090"
+seg.prob.file=paste("~/data/inevent/derived/segs/reval/ami.group.fx0.aug.wsw/", conv, ".tf.pros_pros.eval.txt", sep="")
+seg.word.file=paste("~/data/inevent/derived/segs/asrword/", conv, ".raw.asrword.txt", sep="")
+
+
+add.word.confidence <- function(seg.prob.file, seg.word.file) {
+	seg.probs <- data.table(read.table(seg.prob.file, header=T))
+	seg.probs <- seg.probs[,list(niteid, logit.val)]
+	seg.words <- data.table(read.table(seg.word.file, header=T))
+	if ("niteid" %in% names(seg.words)) {
+		setnames(seg.words, c("niteid"), c("word.id"))
+	}
+	if ("wordId" %in% names(seg.words)) {
+		setnames(seg.words, c("wordId"), c("word"))
+	}
+	setnames(seg.words, c("seg.id"), c("niteid"))
+
+	setkey(seg.words, niteid)	
+	setkey(seg.probs, niteid)
+
+	segs <- seg.probs[seg.words]
+	segs <- data.table(segs, conf.words=tolower(segs$word))
+	segs$conf.word[segs$wordConfidence < 0.9] <- "."
+	segs.conf <- segs[,list(logit.val=unique(logit.val), mean.conf=mean(wordConfidence), nwords=length(conf.word), conf.trans=paste(conf.word, collapse=" ")), by=niteid]
+	segs.conf[order(logit.val, decreasing=T)][1:10]
+
+	x <- data.table(seg.words, conf.word=tolower(seg.words$word))
+	x$conf.word[x$wordConfidence < 0.9] <- "."
+	y <- strsplit(paste(x$conf.word, collapse=" "), "\\.")
+	y <- as.data.table(y)
+	y <- y[grep("[a-z]", y$V1)]
+	
+
+
+
+}
+
+
 ## --------------------------------------------------------------------------
 ## select.quotes: 
 ## utt.probs: probs assigned to utterances/DAs from the Extractive summarizer 

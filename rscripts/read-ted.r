@@ -2,6 +2,7 @@
 
 library(stringi)
 library(data.table)
+library(plyr)
 source("../rscripts/f0basics.r")
 source("../rscripts/nxt-proc.r")
 #----------------------------------------------------
@@ -421,5 +422,24 @@ get.alignwords.from.ted <- function(filename, transdir="~/data/ted/stm-ted2013/"
 }
 
 
+write.ted.plain.txt <- function(filename,
+	transdir="~/data/ted/transcripts/stm-ted2013/",
+	infofile="~/data/ted/transcripts/id_dname_year_sname",
+	sentdir="~/data/ted/traintrans/")
+{
+	print("=== get info file ===")
+	info.dt <- data.table(read.table(infofile, header=F, fill=T))
+        setnames(info.dt, c("id","title","year","filestem"))
+        info.dt <- data.table(info.dt, wav.file=paste(info.dt$filestem, "wav", sep="."), video.file=paste(info.dt$filestem,"mp4",sep="."))
+
+	print("=== get stm trans ===")
+	print(filename)
+	words.dt  <- get.stm.trans(transdir, filename, info.dt, corpus="ted") 
+
+	alltrans <- words.dt[,strsplit(paste(word, collapse=" "), split="\\.")]	
+	alltrans$V1 <- paste(alltrans$V1, ".", sep="")
+
+	write.table(alltrans, file=paste(sentdir, "/", filename, ".sentences", sep=""), quote=F, col.names=F, row.names=F)
+}
 
 

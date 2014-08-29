@@ -80,7 +80,7 @@ fi
 
 
 ## Calculate  lexical features 
-qsub -N get-new-json-$conv $SGESCRIPTS/get-ed-new-json.sh $filename  $CORPUS $infofile  
+#qsub -N get-new-json-$conv $SGESCRIPTS/get-ed-new-json.sh $filename  $CORPUS $infofile  
 
 
 #=========================================================================================
