@@ -66,7 +66,9 @@ clean.stem.word <- function(xword, stem=F, remove.morph=F) {
 ## Segment words into spurts
 get.spurts.from.words <- function(nxtwords.dt0) {
         nxtwords.list <- dlply(nxtwords.dt0[.id == "w"], .(fname), function(x){data.table(x)})
+	print(nxtwords.list[[1]])
         nxtsegs <- reduce_to_segs_all(nxtwords.list)
+	print("here")
         nxtsegs.dt <- data.table(ldply(nxtsegs, function(x) {
                         currconv <- strsplit(unique(x$id), split="\\.")[[1]][1]
                         currspk <- strsplit(unique(x$id), split="\\.")[[1]][2]
@@ -220,14 +222,39 @@ nxtwords.to.dt <- function(fname, dirname="~/data/ami/Data/AMI/NXT-format/words/
         if (!("starttime" %in% names(m.data))) {
                 return(NULL)
         }
-        #m.data$starttime <- unfactor(m.data$starttime)
-        #m.data$endtime <- unfactor(m.data$endtime)
-        #m.data$punc[m.data$punc == "true"] <- TRUE
-
         return(data.table(fname=fname, m.data))
 }
 
+get.das.conv <- function(conv, da.dir="~/data/ami/derived/da/", suffix=".da.txt",
+                xnames=c("da.id","starttime","endtime","spk","datype","utt")) {
+
+        filename <- paste(da.dir,"/", conv,  suffix, sep="")
+        xlist <- list()
+	curr <- data.table(read.delim(filename, header=FALSE))
+	setnames(curr, paste("V",1:6,sep=""), xnames)
+        xdt <- data.table(conv=conv, curr)
+        xdt <- data.table(spk.id=xdt[,paste(conv,spk,sep="-")], xdt[,list(conv,niteid=da.id,spk, starttime,endtime,datype)])
+        setkey(xdt, spk.id)
+	print("here")
+        return(xdt)
+}
+
+
 #------------------------------------------------------------------------------------
+get.ami.words.conv <- function(conv="ES2004a", dirname="~/data/ami/Data/AMI/NXT-format/words/") {
+        print("get.ami.words.conv")
+	filenames <- list.files(dirname,pattern=paste(conv,".*.words.xml", sep=""))
+	nxtwords.dt <- NULL
+	for (filename in filenames ) {
+		currwords <- data.table(nxtwords.to.dt(filename, dirname="~/data/ami/Data/AMI/NXT-format/words/")) 
+        	currwords <- get.nxtwords.dt(currwords)
+        	currwords <- data.table(currwords, clean.word=clean.stem.word(currwords$word, stem=T, remove.morph=T))
+        	setnames(currwords, c("word.id"), c("niteid"))
+		nxtwords.dt <- rbindlist(list(nxtwords.dt, currwords))
+	}
+		
+        return(nxtwords.dt)
+}
 ## Read in all NXT format words in the AMI corpus into a data.table
 ## add cleaned/stemmed version of the word.  
 get.ami.words <- function(dirname="~/data/ami/Data/AMI/NXT-format/words/", outfile="./ami.nxtwords.dt0") {
@@ -243,13 +270,19 @@ get.ami.words <- function(dirname="~/data/ami/Data/AMI/NXT-format/words/", outfi
 
 ## Add some things to nxtwords
 get.nxtwords.dt <- function(nxtwords) {
-        nxtwords.dt <- unlist.df(nxtwords)
+	if (is.data.table(nxtwords)) {
+		print("dt")
+		nxtwords.dt <- nxtwords
+	} else if (is.list(nxtwords)) {
+        	nxtwords.dt <- data.table(unlist.df(nxtwords))
+	}
         nxtwords.dt <- nxtwords.dt[!is.na(starttime)][!is.na(endtime)]
+#	print(nxtwords.dt)
         nxtwords.info <- nxtwords.dt[,{x <- strsplit(fname,split="\\.")[[1]]
                                 list(conv=x[1],spk=x[2])}
-                                ,by=id]
-        setkey(nxtwords.info, id)
-        setkey(nxtwords.dt, id)
+                                ,by=word.id]
+        setkey(nxtwords.info, word.id)
+        setkey(nxtwords.dt, word.id)
         nxtwords.dt <- nxtwords.info[nxtwords.dt]
         conv.maxtime  <- nxtwords.dt[,list(maxtime=max(endtime)),by=conv]
 
@@ -270,7 +303,7 @@ clean.nxtwords <- function(nxtwords.dt) {
 }
 
 ## Join channel info into a dt, and write as flat file
-add.ami.channel.info <- function(nxtsegs.dt, outfile="spurts.txt") {
+add.ami.channel.info <- function(nxtsegs.dt, outfile=NULL) {
 
         m.spks <- get.ami.chan.info()
         chan.info <- m.spks[, list(conv, participant, spk, channel, role)]
@@ -279,7 +312,9 @@ add.ami.channel.info <- function(nxtsegs.dt, outfile="spurts.txt") {
         setkey(chan.info, conv, spk)
         nxtsegs.chan <- chan.info[nxtsegs.dt]
         nxtsegs.chan <- nxtsegs.chan[, list(spk, participant, sid=1:length(spk), channel, starttime, endtime), by=list(conv)]
-        write.table(nxtsegs.chan, file=outfile, quote=F, row.names=F, col.names=F)
+	if (!is.null(outfile)) {
+        	write.table(nxtsegs.chan, file=outfile, quote=F, row.names=F, col.names=F)
+	}
 
         return(nxtsegs.chan)
 
@@ -298,16 +333,16 @@ get.ami.chan.info <- function() {
                         spks <- grep("speaker", names(x))
                         xspks <- NULL
                         if (length(spks) > 0) {
-                        print(xobs)
-                        print(spks)
+				#print(xobs)
+				#print(spks)
                                 for (i in spks) {
-                                        xspks <- rbind(xspks, x[[i]][c("id","channel","spk","camera",#
-                                                "participant","role") ])
+                                        xspks <- rbind(xspks, x[[i]][c("id","channel","nxt_agent","camera",#
+                                                "global_name","role") ])
                                 }
                         } else {
                                 xspks <- "None"
                         }
-                        v <- data.frame(conv=rep(xobs,nrow(xspks)), xspks)
+                        v <- data.table(conv=rep(xobs,nrow(xspks)), xspks)
                 }
                 return(v)
         } )
@@ -317,6 +352,8 @@ get.ami.chan.info <- function() {
         #names(m.spks)[2] <- "conv_id"
         #names(m.spks)[6] <- "id"
         m.spks <- data.table(m.spks)
+	m.spks$spk <- m.spks$nxt_agent
+	m.spks$participant <- m.spks$global_name
         #setkey(m.spks, "id")
         return(m.spks)
 }

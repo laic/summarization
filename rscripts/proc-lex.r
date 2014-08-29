@@ -4,6 +4,7 @@
 source("../rscripts/f0basics.r")
 source("../rscripts/nxt-proc.r")
 source("../rscripts/term-freq.r")
+library(plyr)
 library(tm)
 
 ## Calculate various term frequency features
@@ -81,26 +82,43 @@ clean.pmi <- function(x.pmi) {
 # To remember...
 ##############################################################################################
 
-main.ami.manual.transcripts <- function() {
+get.ami.manual.transcripts <- function(conv, 
+	spurtdir="~/data/ami/derived/spurts/"
+	) {
         ## Get word into one data.table.
-        nxtwords.dt0 <- get.ami.words(dirname="~/data/ami/Data/AMI/NXT-format/words/", 
-                        outfile="~/data/ami/derived/ami.nxtwords.dt0")
+        #nxtwords.dt0 <- get.ami.words(dirname="~/data/ami/Data/AMI/NXT-format/words/", 
+        #                outfile="~/data/ami/derived/ami.nxtwords.dt0")
 
-        ## write out timestamps
-        write.conv.seg(nxtwords.dt0[.id == "w"], dirname="~/data/ami/derived/word/", segname="word")
+        words.dt <- get.ami.words.conv(conv, dirname="~/data/ami/Data/AMI/NXT-format/words/")
 
+	#-- word time --#
+	print("#-- word time --#")
+        ## write out word times: x.conv.word
+        write.conv.seg(words.dt[.id == "w"], dirname="~/data/ami/derived/word/", segname="word")
+
+	setnames(words.dt, c("starttime", "endtime"), c("wstart","wend"))
+        write.features.by.conv(words.dt[.id == "w"], dirname="~/data/ami/derived/word/", fsuffix=".raw.word", plain.txt=F)
+        #write.features.by.conv(words.dt[.id != "w"], dirname="~/data/ami/derived/word/", fsuffix=".raw.nonword", plain.txt=T)
+	
+	print("#-- spurts --#")
         ## Get spurts 
-        nxtspurts.dt <- get.spurts.from.words(nxtwords.dt0)
-
-        ## Add channel info 
-        spurts.dt <- add.ami.channel.info(nxtspurts.dt, outfile="~/data/ami/derived/ami.spurts.txt")
-
-        spurts.dt <- data.table(read.table("~/data/ami/derived/ami.spurts.txt"))
-        setnames(spurts.dt, c("conv","spk","participant","sid","channel","starttime","endtime"))
+	setnames(words.dt, c("wstart","wend"), c("starttime", "endtime"))
+        spurts.dt <- get.spurts.from.words(words.dt)
+        spurts.dt <- add.ami.channel.info(spurts.dt)
         spurts.dt <- data.table(niteid=spurts.dt[,paste(conv,spk,participant,sid,sep=".")], spurts.dt)
+		
+	spurts.dt <- spurts.dt[,{
+                list(conv=conv, spk=spk, participant=participant, sid=sid, chno=channel, vidsrc="ami",
+                starttime=starttime, endtime=endtime, niteid=niteid,
+                longconv=conv, wav.file=paste(conv, ".Headset-", channel, ".wav", sep=""), video.file=NA
+                )}]
 
-        write.conv.seg(spurts.dt, dirname="~/data/ami/derived/spurt/", segname="spurt")
+        write.features.by.conv(spurts.dt, dirname=spurtdir, fsuffix=".spurts", plain.txt=T)
 
+	print("#-- utts = DAs from NXT query --#")
+	da.dt <- get.das.conv(conv)
+	print("HERE")
+        write.conv.seg(da.dt, dirname="~/data/ami/derived/da/", segname="da")
 }
 
 

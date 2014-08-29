@@ -40,7 +40,7 @@ get.lex.from.json <- function(filename, corpus="inevent",
 	spurts <- utts[,{
                 sid <- unlist(lapply(strsplit(niteid, split="\\."), function(x) {x[4]}))
 		list(conv=conv, spk=spk, participant=participant, sid=sid, chno=NA, vidsrc=vidsrc,
-                starttime=starttime, starttime=endtime, niteid=niteid, 
+                starttime=starttime, endtime=endtime, niteid=niteid, 
 		longconv=longconv, wav.file=wav.file, video.file=video.file 
                 )}]
 
