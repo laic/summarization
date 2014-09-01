@@ -437,9 +437,10 @@ write.ted.plain.txt <- function(filename,
 	words.dt  <- get.stm.trans(transdir, filename, info.dt, corpus="ted") 
 
 	alltrans <- words.dt[,strsplit(paste(word, collapse=" "), split="\\.")]	
+	alltrans <- alltrans[grep("[a-zA-Z]", V1)]
 	alltrans$V1 <- paste(alltrans$V1, ".", sep="")
 
-	write.table(alltrans, file=paste(sentdir, "/", filename, ".sentences", sep=""), quote=F, col.names=F, row.names=F)
+	write.table(alltrans, file=paste(sentdir, "/", filename, ".sentences.txt", sep=""), quote=F, col.names=F, row.names=F)
 }
 
 

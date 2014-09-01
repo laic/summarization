@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CLASSPATH=/home/jdriesen/work/punctuation/for_skynews_demo/mxpost/mxpost.jar
+export CLASSPATH=$HOME/summarization/sentence_breaks/mxpost/mxpost.jar:$CLASSPATH
 
 if [ $# != 1 ]
 	then
@@ -10,4 +10,4 @@ if [ $# != 1 ]
 	exit 1
 fi
 
-java -mx1024m tagger.TestTagger $1
+java -Xmx1g tagger.TestTagger $1

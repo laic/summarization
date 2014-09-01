@@ -42,7 +42,7 @@ s/}/-RCB-/g
 
 s=--= -- =g
 
- NOTE THAT SPLIT WORDS ARE NOT MARKED.  Obviously this isn't great, since
+ #NOTE THAT SPLIT WORDS ARE NOT MARKED.  Obviously this isn't great, since
 # you might someday want to know how the words originally fit together --
 # but it's too late to make a better system now, given the millions of
 # words we've already done "wrong".
