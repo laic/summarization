@@ -1,6 +1,7 @@
 library(C50)
-source("../rscripts/")
 library(openNLP)
+library(data.table)
+require(NLP)
 
 apply.punctree <- function(treefile, testfile) {
 	x <- load(treefile)
@@ -28,6 +29,16 @@ demo.tokenizer <- function() {
 
 }
 
+word_space_tokenizer <-function(s) {
+	s <- as.String(s)
+	## Remove the last character (should be a period when using
+	## sentences determined with the trivial sentence tokenizer).
+	## Split on whitespace separators.
+	m <- gregexpr("[^[:space:]]+", s)[[1L]]
+	Span(m, m + attr(m, "match.length") - 1L)
+}
+
+
 tokenize.words <- function(currwords) {
 	s <- paste(tolower(currwords), collapse= " ")
 	s <- as.String(s)
@@ -39,21 +50,33 @@ tokenize.words <- function(currwords) {
 	
 
 	pw <- subset(pos.words, type == "word")
+	pw.dt <- data.table(id=pw$id, start=pw$start, end=pw$end, unlist(pw$features))
+	pw.dt <- pw.dt[,list(start, end, word=substr(as.character(s), start,end),pos=V4),by=id]
+
 	tags <- sapply(pw$features, `[[`, "POS")
+	u <- data.table(s[pw], tags)
+
+	## A simple word token annotator based on the word tokenizer.
+	word_token_annotator <- Simple_Word_Token_Annotator(word_space_tokenizer)
+	tok.words <- annotate(s, list(sent_token_annotator, word_token_annotator))
+	tw <- subset(tok.words, type == "word")
+	tw.dt <- data.table(id=tw$id, start=tw$start, end=tw$end)
+
+
 
 	tags
 }
 
 ################################################
-args=(commandArgs(TRUE))
-print(args)
-if(length(args)==0){
-        stop("No arguments supplied. Exiting.")
-}
+#args=(commandArgs(TRUE))
+#print(args)
+#if(length(args)==0){
+#        stop("No arguments supplied. Exiting.")
+#}
 ################################################
 
 #treefile<- args[1]
-wordfile<- args[1]
+#wordfile<- args[1]
 
 
 
