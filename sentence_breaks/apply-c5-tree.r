@@ -61,10 +61,15 @@ tokenize.words <- function(currwords) {
 	tok.words <- annotate(s, list(sent_token_annotator, word_token_annotator))
 	tw <- subset(tok.words, type == "word")
 	tw.dt <- data.table(id=tw$id, start=tw$start, end=tw$end)
+tw	tw.dt <- tw.dt[,list(start, end, word=substr(as.character(s), start,end)),by=id]
+
+tw.int <- Intervals(tw.dt[,list(start,end)])
+pw.int <- Intervals(pw.dt[,list(start,end)])
+v <- interval_overlap(tw.int, pw.int)
+u <- unlist(lapply(v, function(x) {paste(c(pw.dt$word[x], pw.dt$pos[x]), collapse="")}))
 
 
 
-	tags
 }
 
 ################################################
