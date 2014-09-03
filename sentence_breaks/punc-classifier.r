@@ -3,6 +3,49 @@ library(openNLP)
 library(data.table)
 require(NLP)
 
+
+get.punctree <- function(posdir, treefile=NULL, train.prop=NA) {
+	filenames <- list.files(posdir, pattern=".pos$", full.names=T)
+	filelist <- as.list(filenames)
+	names(filelist) <- basename(filenames)
+
+	train.convs <- lapply(filelist, function(filename) {x <- load(filename); get(x)})	
+	train.convs.dt <- rbindlist(train.convs[sample.int(length(train.convs))])	
+	train.convs.dt$punc <- "CONT"
+	train.convs.dt$punc[train.convs.dt$sent.end == T] <- "STOP"
+	train.convs.dt$punc <- factor(train.convs.dt$punc)
+
+	if (!is.na(train.prop)) {
+		train.size <- floor(nrow(train.convs.dt) * train.prop)
+		print(train.size)
+		train.pos <- train.convs.dt[1:train.size]
+		test.pos <- train.convs.dt[(train.size+1):nrow(train.convs.dt)]
+	} else {
+		train.pos <- train.convs.dt
+	}
+
+
+	punctree <- C5.0(punc ~ target+p1+p2+p3+n1+n2+n3, data=train.pos)
+
+	if (!is.na(train.prop)) {
+		punctreePred <- predict(punctree, test.pos)
+		punctreeProbs <- data.table(test.pos, predict(punctree, test.pos, type ="prob"))
+
+	} else {
+		punctreeProbs <- NULL
+	}
+
+	if (!is.null(treefile)) {
+		save(punctree, file=treefile)
+		if (!is.null(punctreeProbs)) {
+			save(punctreeProbs, file=paste(treefile,".test.Probs", sep=""))
+		}
+	}
+	return(punctree)
+
+
+}
+
 apply.punctree <- function(treefile, test.pos=NULL, testfile=NULL) {
 	x <- load(treefile)
 	punctree <- get(x)
@@ -33,7 +76,7 @@ demo.tokenizer <- function() {
 
 }
 
-get.traintrans.conv <- function(filename) {
+get.stop.labelled.pos.conv <- function(filename) {
 	x <- data.table(read.delim(filename, header=F))
 	tpos <- get.pos.tags(x$V1, no.stops=F)
 	tpos.words <- tpos[["pos.words"]]
@@ -42,20 +85,21 @@ get.traintrans.conv <- function(filename) {
 	tpos.words <- tpos.words[!(pos %in% c(".", ",",":"))]
 
 	tpos.cont <- get.pos.context(tpos.words)
-	tpos.train <- data.table(tpos.cont, sent.end=tpos.words$stop.next)	
+	tpos.train <- data.table(tpos.cont, sent.end=tpos.words$stop.next, tpos.words$id, tpos.words$word)	
 
 	return(tpos.train)
 
 }
+
 
 get.train.pos <- function(transdir) {
 	filenames <- list.files(transdir, full.names=T)
 
 	train.convs <- list() 
 	for (filename in filenames) {
+		print(filename)
 		train.convs[[basename(filename)]] <- get.traintrans.conv(filename)
 	}
-
 	return(train.convs)
 
 } 
@@ -145,10 +189,9 @@ get.pos.context <- function(pos.words, nprev=3, nnext=3) {
 #        stop("No arguments supplied. Exiting.")
 #}
 ################################################
+#transdir <- args[1]
 
-#treefile<- args[1]
-#wordfile<- args[1]
-
+#transdir <- "~/data/ted/traintrans/"
 
 
 
