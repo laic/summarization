@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#SGESCRIPTS="../sgescripts/"
 
 fsetname=$1
 dataset=$2

@@ -9,7 +9,7 @@
 
 . /etc/profile.d/modules.sh
 
-export PATH=$HOME/summarization/ineventwrappers/:$PATH
+#export PATH=$HOME/summarization/ineventwrappers/:$PATH
 
 # Run the program
 
@@ -26,7 +26,7 @@ then
        exit 1  
 fi
 
-./extract-spurt-feats.sh $spurtfile $spurtdir $indir 
+. $SCRIPTPATH/extract-spurt-feats.sh $spurtfile $spurtdir $indir 
 
 exit 0
 

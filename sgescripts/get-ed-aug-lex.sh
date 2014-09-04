@@ -16,7 +16,7 @@ CONV=$1
 export PATH=~/local/bin:$PATH 
 
 echo "*** get augmented lexical features ***"
-SCRIPTDIR=../ineventwrappers/
+#SCRIPTDIR=../ineventwrappers/
 
 echo "--- tf-if-slope ---"
 varname="tf-if-slope"

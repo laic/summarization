@@ -15,6 +15,10 @@ filename=~/data/$CORPUS/UEDIN_ASR_201407/$conv.json
 infofile=~/data/$CORPUS/filenames.txt
 echo $conv $filename
 
+if [ ! -e $datadir ]
+then
+	mkdir $datadir
+fi
 
 ## The naming of these directories is a bit historical at this point
 ## $datadir/segs is where features related to various segments of the meeting 

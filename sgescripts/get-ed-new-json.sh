@@ -10,7 +10,6 @@
 . /etc/profile.d/modules.sh
 
 export PATH=~/local/bin:$PATH
-export DATADIR="~/data/inevent/derived/"
 
 # Run the program
 # -pe memory-2G 2
@@ -18,6 +17,9 @@ export DATADIR="~/data/inevent/derived/"
 filename=$1
 corpus=$2
 infofile=$3
+
+export DATADIR=$DATADIR
+#export DATADIR="~/data/inevent/derived/"
 
 Rscript ../rscripts/get-new-json.r $filename $corpus $infofile 
 

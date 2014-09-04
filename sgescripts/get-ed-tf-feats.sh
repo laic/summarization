@@ -10,7 +10,8 @@
 . /etc/profile.d/modules.sh
 
 export PATH=~/local/bin:$PATH
-export DATADIR=~/data/inevent/derived/
+export DATADIR=$DATADIR
+
 # Run the program
 
 idfconvfile="~/data/inevent/tables/all.nxtwords.idf.conv.txt"

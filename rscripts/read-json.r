@@ -26,7 +26,9 @@ read.json.asr <- function(filename, info.dt) {
 
 	## get segs
 	segs.dt <- data.table(conv=conv, longconv=longconv, wav.file=wav.file, video.file=video.file, x$segments[1:4])
+	segs.dt <- segs.dt[order(startTime)]	
 	segs.dt <- data.table(seg.id=paste(conv, segs.dt$speakerId, "seg", 1:nrow(segs.dt), sep="."),  segs.dt)
+
 #	print(segs.dt)
 
 	## get words	
@@ -45,9 +47,9 @@ read.json.asr <- function(filename, info.dt) {
 	setkey(segs.dt, seg.id)
 	setkey(words.dt, seg.id)
 	words.dt <- segs.dt[words.dt]
+	words.dt <- words.dt[order(wordStart)]
 
 	words.dt <- data.table(word.id=words.dt[,paste(conv,".", speakerId, ".words", c(1:nrow(words.dt)), sep="")], words.dt)
-
 	return(words.dt)
 	
 }
