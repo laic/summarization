@@ -191,6 +191,7 @@ get.test.data <- function(filename, punctree, word.var="wordId", start.var="word
 	currwords <- words.dt[[word.var]]
 
 	ptag.list <- get.pos.tags(currwords, no.stops=T) 
+	save(ptag.list, file=paste(fstem, ".ptag.list", sep=""))
 
 	pos.words <- ptag.list[["pos.words"]] 
 	pos.cont <- get.pos.context(pos.words)
