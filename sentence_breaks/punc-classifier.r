@@ -182,6 +182,28 @@ get.pos.context <- function(pos.words, nprev=3, nnext=3) {
 	return(pos.dt)
 }
 
+get.test.data <- function(filename, punctree, word.var="wordId", start.var="wordStart") {
+	fstem <- basename(filename)
+
+	words.dt <- data.table(read.table(filename))
+	setnames(words.dt, c(start.var), c("wstart"))
+	words.dt <- words.dt[order(wstart)]
+	currwords <- words.dt[[word.var]]
+
+	ptag.list <- get.pos.tags(currwords, no.stops=T) 
+
+	pos.words <- ptag.list[["pos.words"]] 
+	pos.cont <- get.pos.context(pos.words)
+
+	punctreePred <- predict(punctree, pos.cont)
+        punctreeProbs <- data.table(pos.words, predict(punctree, pos.cont, type ="prob"))
+
+	save(punctreeProbs, file=paste(fstem, ".tree.probs", sep=""))
+
+	## Re-align with words
+
+}
+
 ################################################
 #args=(commandArgs(TRUE))
 #print(args)
