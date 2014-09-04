@@ -2,7 +2,8 @@ library(C50)
 library(openNLP)
 library(data.table)
 require(NLP)
-
+library(plyr)
+library(intervals)
 
 get.punctree <- function(posdir, treefile=NULL, train.prop=NA) {
 	filenames <- list.files(posdir, pattern=".pos$", full.names=T)
@@ -148,13 +149,13 @@ get.pos.tags <- function(currwords, no.stops=F) {
 	return(list(tok.words=tw.dt, pos.words=pw.dt, sentence=sw.dt))
 }
 
-get.pos.tok.overlap <- function(tw.dt, pw.dt) { 
+get.pos.tok.overlap <- function(tw.dt, pw.dt, tw.id="wid") { 
 	tw.int <- Intervals(tw.dt[,list(start,end)])
 	pw.int <- Intervals(pw.dt[,list(start,end)])
 	v <- interval_overlap(tw.int, pw.int)
-	u <- unlist(lapply(v, function(x) {paste(c(pw.dt$word[x], pw.dt$pos[x]), collapse="")}))
-
-	return(u)
+	names(v) <- tw.dt[[tw.id]]
+	u <- ldply(v, function(x) {pw.dt[x]})
+	return(data.table(u))
 }
 
 get.pos.context <- function(pos.words, nprev=3, nnext=3) {
@@ -182,27 +183,67 @@ get.pos.context <- function(pos.words, nprev=3, nnext=3) {
 	return(pos.dt)
 }
 
-get.test.data <- function(filename, punctree, word.var="wordId", start.var="wordStart") {
+get.test.data <- function(filename, punctree, word.var="wordId", start.var="wordStart", threshhold=0.5) {
 	fstem <- basename(filename)
 
+	## Get words
 	words.dt <- data.table(read.table(filename))
 	setnames(words.dt, c(start.var), c("wstart"))
 	words.dt <- words.dt[order(wstart)]
 	currwords <- words.dt[[word.var]]
 
+	## get pos tags
 	ptag.list <- get.pos.tags(currwords, no.stops=T) 
-	save(ptag.list, file=paste(fstem, ".ptag.list", sep=""))
+	ptag.list[["niteid"]] <- words.dt[["word.id"]]
+	#save(ptag.list, file=paste(fstem, ".ptag.list", sep=""))
 
+	## Get POS features for decision tree   
 	pos.words <- ptag.list[["pos.words"]] 
 	pos.cont <- get.pos.context(pos.words)
 
+	## Apply decision tree
 	punctreePred <- predict(punctree, pos.cont)
         punctreeProbs <- data.table(pos.words, predict(punctree, pos.cont, type ="prob"))
+	#save(punctreeProbs, file=paste(fstem, ".tree.probs", sep=""))
 
-	save(punctreeProbs, file=paste(fstem, ".tree.probs", sep=""))
+	## Match up with original word list, since pos.words have some contraction splitting.	
+	tok.words <- ptag.list[["tok.words"]]
 
-	## Re-align with words
+	## Add external ids if we have them
+	if ("niteid" %in% names(words.dt)) {
+		tok.words$wid <- words.dt$word.id
+	} else {
+		setnames(tok.words, "id", "wid")
+	}
 
+	currw <- get.pos.tok.overlap(tok.words, punctreeProbs)
+	setnames(currw, ".id", "wid")
+	currw$id <- as.numeric(currw$id)
+
+	## Get new sentence labels
+	sent.ends <- currw[STOP > threshhold, id]
+	sent.starts <- c(min(currw[, id]), head(sent.ends+1, -1))
+	s.dt <- data.table(sid=1:length(sent.ends), s.start=sent.starts, s.end=sent.ends)
+	s.int <- Intervals(.dt[,list(s.start, s.end)])
+	w.int <- Intervals(currw[,list(id,id)]) 
+	sw.list <- interval_overlap(s.int, w.int)
+	names(sw.list) <- paste("sentence.", s.dt$sid, sep="")
+
+	currsw <- data.table(ldply(sw.list, function(x) {currw[x]}))
+	setnames(currsw, ".id", "sid")
+
+	## Add more info to speaker sentence id   
+	if ("niteid" %in% names(words.dt)) {
+		conv.spk <- ldply(strsplit(currsw$wid, split="\\."), function(x) {data.table(conv=unlist(x[1]), spk=unlist(x[2]))})
+		currsw <- data.table(conv.spk, currsw)
+		currsw$sid <- paste(currsw$conv, currsw$spk, currsw$sid, sep=".")
+	} else {
+		currconv <- strsplit(fstem,split="\\.")[[1]][1]
+		currsw$sid <- paste(currconv, currsw$sid, sep=".")
+	}
+
+	write.table(currsw, file=paste(fstem, ".autopunc.words.txt", sep=""))
+	return(currsw)
 }
 
 ################################################
