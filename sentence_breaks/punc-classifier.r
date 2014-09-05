@@ -183,7 +183,7 @@ get.pos.context <- function(pos.words, nprev=3, nnext=3) {
 	return(pos.dt)
 }
 
-get.test.data <- function(filename, punctree, word.var="wordId", start.var="wordStart", threshhold=0.5) {
+get.test.data <- function(filename, punctree, word.var="wordId", start.var="wordStart", threshhold=0.5, word.id="word.id") {
 	fstem <- basename(filename)
 
 	## Get words
@@ -194,7 +194,6 @@ get.test.data <- function(filename, punctree, word.var="wordId", start.var="word
 
 	## get pos tags
 	ptag.list <- get.pos.tags(currwords, no.stops=T) 
-	ptag.list[["niteid"]] <- words.dt[["word.id"]]
 	#save(ptag.list, file=paste(fstem, ".ptag.list", sep=""))
 
 	## Get POS features for decision tree   
@@ -203,6 +202,7 @@ get.test.data <- function(filename, punctree, word.var="wordId", start.var="word
 
 	## Apply decision tree
 	punctreePred <- predict(punctree, pos.cont)
+        #punctreeProbs <- data.table(pos.words, predict(punctree, pos.cont, type ="prob"), pred.class=predict(punctree,pos.cont,type ="class"))
         punctreeProbs <- data.table(pos.words, predict(punctree, pos.cont, type ="prob"))
 	#save(punctreeProbs, file=paste(fstem, ".tree.probs", sep=""))
 
@@ -210,8 +210,8 @@ get.test.data <- function(filename, punctree, word.var="wordId", start.var="word
 	tok.words <- ptag.list[["tok.words"]]
 
 	## Add external ids if we have them
-	if ("niteid" %in% names(words.dt)) {
-		tok.words$wid <- words.dt$word.id
+	if (word.id %in% names(words.dt)) {
+		tok.words$wid <- words.dt[[word.id]]
 	} else {
 		setnames(tok.words, "id", "wid")
 	}
@@ -224,7 +224,7 @@ get.test.data <- function(filename, punctree, word.var="wordId", start.var="word
 	sent.ends <- currw[STOP > threshhold, id]
 	sent.starts <- c(min(currw[, id]), head(sent.ends+1, -1))
 	s.dt <- data.table(sid=1:length(sent.ends), s.start=sent.starts, s.end=sent.ends)
-	s.int <- Intervals(.dt[,list(s.start, s.end)])
+	s.int <- Intervals(s.dt[,list(s.start, s.end)])
 	w.int <- Intervals(currw[,list(id,id)]) 
 	sw.list <- interval_overlap(s.int, w.int)
 	names(sw.list) <- paste("sentence.", s.dt$sid, sep="")
@@ -233,7 +233,7 @@ get.test.data <- function(filename, punctree, word.var="wordId", start.var="word
 	setnames(currsw, ".id", "sid")
 
 	## Add more info to speaker sentence id   
-	if ("niteid" %in% names(words.dt)) {
+	if (word.id %in% names(words.dt)) {
 		conv.spk <- ldply(strsplit(currsw$wid, split="\\."), function(x) {data.table(conv=unlist(x[1]), spk=unlist(x[2]))})
 		currsw <- data.table(conv.spk, currsw)
 		currsw$sid <- paste(currsw$conv, currsw$spk, currsw$sid, sep=".")
