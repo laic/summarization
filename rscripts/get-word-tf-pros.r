@@ -25,6 +25,8 @@ if(length(args)<3){
 	segsdir <- args[3]
 	rmstop <- as.logical(args[4])
 	wtype <- args[5]
+	segfile <- args[6]
+
 
 	if (wtype=="manual") {
 		wtype <- ""
@@ -44,6 +46,7 @@ if(length(args)<3){
 	xlex <- load(lexfile) 		
 	x.lex.grp <- data.table(get(xlex)) 
 
+
 	## Fix previous naming inconsistencies
 	if (!("niteid" %in% names(x.lex.grp))) {
 		setnames(x.lex.grp, c("id"), c("niteid"))
@@ -53,12 +56,28 @@ if(length(args)<3){
 		setnames(x.lex.grp, c("tf","idf","tf.idf"), c("tf.spk","idf.spk","tf.idf.spk")) 
 		setnames(x.lex.grp, c("tf.grp","idf.grp","tf.idf.grp"), c("tf","idf","tf.idf")) 
 	}
+
 	
 	if (rmstop ==T) {	
 		print("rmstop")
 		x.lex.grp$tf.idf[x.lex.grp$clean.word %in% stopwords()] <- 0 
 		x.lex.grp$su.idf[x.lex.grp$clean.word %in% stopwords()] <- 0 
 	}
+
+	if (segfile != "") {
+		print("segfile")
+		print(segfile)
+		segwords <- data.table(read.table(segfile, header=T))
+		currwids <- segwords$niteid  
+
+		x.lex.grp <- x.lex.grp[niteid %in% currwids] 
+		x.lex.f0 <- x.lex.f0[niteid %in% currwids] 
+		x.lex.i0 <- x.lex.i0[niteid %in% currwids] 
+		print("new row lengths")
+		print(c(nrow(x.lex.grp),nrow(x.lex.f0),nrow(x.lex.i0)))
+		
+	}
+
 
 	## Join data.tables 	
         setkey(x.lex.f0, niteid, wstart, wend, conv, participant, nxt_agent)
@@ -81,6 +100,8 @@ if(length(args)<3){
 		x.eda <- try(data.table(read.table(edafile, header=TRUE))) 		
 		if(is.data.table(x.eda)) {
 			x.pmi <- data.table(x.pmi[,list(link.eda=(niteid %in% x.eda$niteid))], x.pmi)
+		} else {
+			print("No EDAs to add")
 		}
 	} else {
 		x.pmi <- x.pmi[,list(link.eda, niteid, pmi_t, pmi_f, wfreq)]

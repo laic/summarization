@@ -4,6 +4,7 @@
 NNDIR=../nn/
 RSCRIPTS=../rscripts/
 SGEDIR=../sgescripts/
+SCRIPTDIR=../ineventwrappers/
 
 ## Current conv
 conv=$1
@@ -123,7 +124,7 @@ infile=$testsetdir/$featname-eval.txt
 outfile=$testsetdir/${corpus}_mlp_${featname}_${n_in}-$hname.prob
 
 echo $infile $n_in $corpus $testonly $model $hsize
-./apply-mlp.sh $infile $model $n_in $hsize $outfile $testonly
+. $SCRIPTDIR/apply-mlp.sh $infile $model $n_in $hsize $outfile $testonly
 
 ##-----------------------------------------------------------------------
 ## get flat file version of mlp output
@@ -139,7 +140,8 @@ Rscript $RSCRIPTS/get-word-ids.r $probfname $idfname $lexdir
 
 
 #-----------------------------------------------------------------------
-# get DA level features 
+# get longer segment, e.g. DA, level features 
+
 echo "--- get word da features ---"
 fset_layer=${fset}_${n_in}-${hsize}
 windowtype=asrutt
@@ -149,5 +151,4 @@ echo ${fset_layer}
 Rscript $RSCRIPTS/get-tf-window.r $conv $lexname $segsdir $windowtype $SPKONLY ${fset_layer} 
 
 echo "DONE"
-exit 0
 

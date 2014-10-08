@@ -46,7 +46,7 @@ collate.tf.pros <- function(fsets, fdir, suffix, prefix="") {
 				curr.feats <- curr.feats[!is.na(conv)]
 			}
 
-			# Because R does this in somewhere else
+			# Because R does this substitution somewhere else
 			if (!is.null(all.feats)) {
 				fsetvals <- grep(gsub("-", ".", fset), names(curr.feats), value=T)
 				curr.feats <- curr.feats[,c("niteid", fsetvals), with=F]

@@ -3,7 +3,7 @@ export SGESCRIPTS="../sgescripts/"
 export RSCRIPTS="../rscripts/"
 export PRAATSCRIPTS="../praatscripts/"
 export PYSCRIPTS="../pyscripts/"
-export SCRIPTDIR="../ineventwrappers/"
+export SCRIPTDIR="../bashscripts/"
 export CORPUS="inevent"
 export PRAAT=$HOME/.local/bin/praat
 

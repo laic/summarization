@@ -10,7 +10,9 @@ rmstop=T	# set stopwords tf.idf and su.idf values to zero
 
 wtype="$1"	# asr,  manual  
 conv=$2		 
-echo $conv $wtype
+segfile=$3
+
+echo $conv $wtype $segfile
 
 if [ "$wtype" != "manual" ]
 then
@@ -25,4 +27,4 @@ f0wordjid=get-pwin-f0-${wtype}word-$conv
 echo "Name: get-tfpros-${wtype}lex-$conv"
 echo "holds: $i0wordjid $f0wordjid"
 
-qsub -N get-tfpros-${wtype}lex-$conv -hold_jid get-tf-feats-$conv,$i0wordjid,$f0wordjid  $SGEDIR/get-ed-tf-pros-all.sh $conv $segsdir $rmstop $wtype
+qsub -N get-tfpros-${wtype}lex-$conv -hold_jid get-tf-feats-$conv,$i0wordjid,$f0wordjid  $SGEDIR/get-ed-tf-pros-all.sh $conv $segsdir $rmstop $wtype $segfile

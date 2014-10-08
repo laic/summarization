@@ -138,6 +138,8 @@ get.pos.tags <- function(currwords, no.stops=F) {
 	pw <- subset(pos.words, type == "word")
 	pw.dt <- data.table(id=pw$id, start=pw$start, end=pw$end, pos=unlist(pw$features))
 	pw.dt <- pw.dt[,list(start, end, word=substr(as.character(s), start,end),pos=pos),by=id]
+	print(pw.dt[grep("[A-Z]", pos, invert=T)])
+	pw.dt[grep("[A-Z]", pos, invert=T)]$pos <- "UH"
 
 	## Get original word positions in the string so we can map back to timing info.
 	word_token_annotator <- Simple_Word_Token_Annotator(word_space_tokenizer)
@@ -183,23 +185,29 @@ get.pos.context <- function(pos.words, nprev=3, nnext=3) {
 	return(pos.dt)
 }
 
-get.test.data <- function(filename, punctree, word.var="wordId", start.var="wordStart", threshhold=0.5, word.id="word.id") {
+get.autopunc.words <- function(filename, punctree, word.var="wordId", start.var="wordStart", threshhold=0.5, word.id="word.id") {
 	fstem <- basename(filename)
-
+	print(filename)
 	## Get words
-	words.dt <- data.table(read.table(filename))
-	setnames(words.dt, c(start.var), c("wstart"))
+	words.dt <- data.table(read.table(filename, header=T))
+	print(paste("start.var:", start.var))
+	print(names(words.dt))
+	setnames(words.dt, start.var, c("wstart"))
+	setnames(words.dt, word.id, c("niteid"))
 	words.dt <- words.dt[order(wstart)]
+	
 	currwords <- words.dt[[word.var]]
 
 	## get pos tags
 	ptag.list <- get.pos.tags(currwords, no.stops=T) 
-	#save(ptag.list, file=paste(fstem, ".ptag.list", sep=""))
+	save(ptag.list, file=paste(fstem, ".ptag.list", sep=""))
 
+	print("pos features")
 	## Get POS features for decision tree   
 	pos.words <- ptag.list[["pos.words"]] 
 	pos.cont <- get.pos.context(pos.words)
 
+	print("apply tree")
 	## Apply decision tree
 	punctreePred <- predict(punctree, pos.cont)
         #punctreeProbs <- data.table(pos.words, predict(punctree, pos.cont, type ="prob"), pred.class=predict(punctree,pos.cont,type ="class"))
@@ -210,11 +218,7 @@ get.test.data <- function(filename, punctree, word.var="wordId", start.var="word
 	tok.words <- ptag.list[["tok.words"]]
 
 	## Add external ids if we have them
-	if (word.id %in% names(words.dt)) {
-		tok.words$wid <- words.dt[[word.id]]
-	} else {
-		setnames(tok.words, "id", "wid")
-	}
+	tok.words$wid <- words.dt$niteid
 
 	currw <- get.pos.tok.overlap(tok.words, punctreeProbs)
 	setnames(currw, ".id", "wid")
@@ -232,17 +236,18 @@ get.test.data <- function(filename, punctree, word.var="wordId", start.var="word
 	currsw <- data.table(ldply(sw.list, function(x) {currw[x]}))
 	setnames(currsw, ".id", "sid")
 
-	## Add more info to speaker sentence id   
-	if (word.id %in% names(words.dt)) {
-		conv.spk <- ldply(strsplit(currsw$wid, split="\\."), function(x) {data.table(conv=unlist(x[1]), spk=unlist(x[2]))})
-		currsw <- data.table(conv.spk, currsw)
-		currsw$sid <- paste(currsw$conv, currsw$spk, currsw$sid, sep=".")
-	} else {
-		currconv <- strsplit(fstem,split="\\.")[[1]][1]
-		currsw$sid <- paste(currconv, currsw$sid, sep=".")
-	}
+	setkey(currsw, wid)
+	setkey(words.dt, niteid) 
 
-	write.table(currsw, file=paste(fstem, ".autopunc.words.txt", sep=""))
+	currsw <- words.dt[currsw]	
+	currsw$sent.id <- paste(currsw$conv, currsw$spk, currsw$sid, sep=".")
+	currsw.times <- currsw[,list(sent.start=min(wstart), sent.end=max(wend)),by=sent.id]
+	setkey(currsw.times, sent.id)
+	setkey(currsw, sent.id)
+
+	currsw <- currsw.times[currsw]	
+
+	write.table(currsw, file=paste(dirname(filename), "/", currsw$conv[1], ".autopunc.words.txt", sep=""))
 	return(currsw)
 }
 

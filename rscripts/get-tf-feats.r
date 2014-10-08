@@ -18,7 +18,9 @@ get.tf.feats <- function(currconv, corpus="inevent",
 	print("=== get words from current conv ===")
         worddir <- paste(datadir, "/", wtype, "/", sep="")
 	words.dt <- data.table(read.table(paste(worddir, currconv, word.file.suffix, sep=""), header=T)) 
-
+	if ("word.id" %in% names(words.dt)) {
+		setnames(words.dt, c("word.id","wordEnd","wordStart","speakerId","wordId"), c("niteid","wend","wstart","spk","word"))
+	}
 	
 	## Get the words from the current dataset
 	## We do it like this basically to be able to correct errors on this dataset
@@ -28,13 +30,21 @@ get.tf.feats <- function(currconv, corpus="inevent",
 	dset.words.dt0 <- rbindlist(lapply(dset.word.files, function(filename) {
 		curr.dt <- data.table(read.table(filename,header=T))
 		## To match with current format of AMI/ICSI word files
-		curr.dt0 <- curr.dt[,list(corpora=corpus,id=word.id, conv=conv, maxtime=max(wordEnd, na.rm=T), spk=speakerId,
-                	fname=longconv, .id="w", starttime=wordStart, endtime=wordEnd, word=wordId,
-                	clean.word=clean.stem.word(tolower(wordId), stem=T, remove.morph=T))] 	
+		if ("word.id" %in% names(curr.dt)) {
+			curr.dt0 <- curr.dt[,list(corpora=corpus,id=word.id, conv=conv, maxtime=max(wordEnd, na.rm=T), spk=speakerId,
+				fname=longconv, .id="w", starttime=wordStart, endtime=wordEnd, word=wordId,
+				clean.word=clean.stem.word(tolower(wordId), stem=T, remove.morph=T))] 	
+		} else {
+			curr.dt0 <- curr.dt[,list(corpora=corpus,id=niteid, conv=conv, maxtime=max(wend, na.rm=T), spk=spk,
+				fname=longconv, .id="w", starttime=wstart, endtime=wend, word=word,
+				clean.word=clean.stem.word(tolower(word), stem=T, remove.morph=T))] 	
+
+		}
 		return(curr.dt0)
 	}))
 
-        xwords.dt0 <- words.dt[,list(corpora=corpus,niteid=niteid, conv=conv, maxtime=max(wordEnd, na.rm=T), spk=spk,
+
+        xwords.dt0 <- words.dt[,list(corpora=corpus,niteid=niteid, conv=conv, maxtime=max(wend, na.rm=T), spk=spk,
                 fname=longconv, .id="w", starttime=wstart, endtime=wend, word=word, 
 		clean.word=clean.stem.word(tolower(word), stem=T, remove.morph=T))]
 

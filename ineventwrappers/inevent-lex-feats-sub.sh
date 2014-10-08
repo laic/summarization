@@ -7,8 +7,8 @@ datadir=/exports/home/clai/data/inevent/derived/
 pscores=F
 lextype=asrlex 
 
-fsetname=$1
-prefix=$2
+fsetname=$1	## the feature set designation, this is hardcoded for the moment in the R file 
+prefix=$2	## e.g. the conversion name, conv
 
 echo "********************************"
 echo "Name: get-fx0-$fsetname-$prefix"

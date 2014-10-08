@@ -4,19 +4,19 @@
 #$ -cwd
 #$ -o ./edout
 #$ -e ./edout
-#$ -l h_rt=36:00:00
+#$ -l h_rt=6:00:00
 # Initialise environment module
 
 . /etc/profile.d/modules.sh
 
+SCRIPTDIR=../ineventwrappers/
+export PATH=~/local/bin:$PATH 
 
 # Run the program
 CONV=$1
 
-export PATH=~/local/bin:$PATH 
 
 echo "*** get augmented lexical features ***"
-#SCRIPTDIR=../ineventwrappers/
 
 echo "--- tf-if-slope ---"
 varname="tf-if-slope"

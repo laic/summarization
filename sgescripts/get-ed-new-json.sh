@@ -18,7 +18,7 @@ filename=$1
 corpus=$2
 infofile=$3
 
-export DATADIR=$DATADIR
+#export DATADIR=$DATADIR
 #export DATADIR="~/data/inevent/derived/"
 
 Rscript ../rscripts/get-new-json.r $filename $corpus $infofile 

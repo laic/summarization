@@ -17,6 +17,7 @@ conv=$1
 segsdir=$2
 rmstop=$3
 wtype="$4"
+segfile="$5"
 
-Rscript $RSCRIPTS/get-word-tf-pros.r $conv lex $segsdir $rmstop $wtype 
+Rscript $RSCRIPTS/get-word-tf-pros.r $conv lex $segsdir $rmstop $wtype $segfile
 

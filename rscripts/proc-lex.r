@@ -84,7 +84,8 @@ clean.pmi <- function(x.pmi) {
 
 get.ami.manual.transcripts <- function(conv, 
 	spurtdir="~/data/ami/derived/spurts/"
-	) {
+	) 
+{
         ## Get word into one data.table.
         #nxtwords.dt0 <- get.ami.words(dirname="~/data/ami/Data/AMI/NXT-format/words/", 
         #                outfile="~/data/ami/derived/ami.nxtwords.dt0")
