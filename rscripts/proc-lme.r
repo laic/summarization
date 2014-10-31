@@ -65,8 +65,11 @@ get.eda.true.pred <- function(m, newdata, corpus=F, spk=F) {
 
 	
 	m.ranef <- ranef(m)
+
 	if (spk) {
+		print("HERE spk")	
 		mtype.fx <- newdata[,list(fx=get.glevel.effect(m.ranef,mtype,"mtype")),by=list(wid.spk,annot)]$fx
+
         	sum.fx  <- u + mtype.fx
 		if ("annot" %in% m.ranef) {
 			annot.fx <- newdata[,list(fx=get.glevel.effect(m.ranef,annot,"annot")),by=list(wid.spk,annot)]$fx
@@ -86,21 +89,28 @@ get.eda.true.pred <- function(m, newdata, corpus=F, spk=F) {
 
 		}
 	} else {
+		print("HERE")	
 		mtype.fx <- newdata[,list(fx=get.glevel.effect(m.ranef,mtype,"mtype")),by=list(wid,annot)]$fx
         	sum.fx  <- u + mtype.fx
+		print(m.ranef)
+		print(names(m.ranef))
 		if ("annot" %in% m.ranef) {
+			print("annot")
 			annot.fx <- newdata[,list(fx=get.glevel.effect(m.ranef,annot,"annot")),by=list(wid,annot)]$fx
 			sum.fx <- sum.fx + annot.fx
 		}
 		if ("eda.annot" %in% m.ranef) {
+			print("eda.annot")
 			eda.annot.fx <- newdata[,list(fx=get.glevel.effect(m.ranef,eda.annot,"eda.annot")),by=list(wid,annot)]$fx
 			sum.fx <- sum.fx + eda.annot.fx
 		}
 		if ("mgroup" %in% m.ranef) {
+			print("mgroup")
 			mgroup.fx <- newdata[,list(fx=get.glevel.effect(m.ranef,mgroup,"mgroup")),by=list(wid,annot)]$fx
 			sum.fx <- sum.fx + mgroup.fx
 		}
 		if ("corpus" %in% m.ranef) {
+			print("corpus")
         		corpus.fx <- newdata[,list(fx=get.glevel.effect(m.ranef,corpus,"corpus")),by=list(wid,annot)]$fx
 			sum.fx <- sum.fx + corpus.fx
 

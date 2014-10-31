@@ -200,7 +200,7 @@ get.autopunc.words <- function(filename, punctree, word.var="wordId", start.var=
 
 	## get pos tags
 	ptag.list <- get.pos.tags(currwords, no.stops=T) 
-	save(ptag.list, file=paste(fstem, ".ptag.list", sep=""))
+	#save(ptag.list, file=paste(fstem, ".ptag.list", sep=""))
 
 	print("pos features")
 	## Get POS features for decision tree   

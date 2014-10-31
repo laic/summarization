@@ -29,6 +29,7 @@ echo $file $spurtdir $wavdir
 echo "Name: get-spurt-feats-$PREFIX"
 echo "hold: get-new-json-$PREFIX"
 qsub -N get-spurt-feats-$PREFIX -hold_jid get-new-json-$PREFIX  $SGEDIR/get-ed-spurt-feats.sh $file $spurtdir $wavdir
+#$SGEDIR/get-ed-spurt-feats.sh $file $spurtdir $wavdir
 
 
 #done

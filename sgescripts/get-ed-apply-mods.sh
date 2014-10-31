@@ -22,9 +22,9 @@ datadir=$4 # ~/data/ami/derived/
 moddataset=$5
 moddatadir=$6
 modcorpus=$7
-dawordfile=$8
+wordfile=$8
+wtype=$9
 
-
-Rscript $RSCRIPTS/apply-da-mods.r $fsetname $dataset $corpus $datadir $moddataset $moddatadir $modcorpus $dawordfile
+Rscript $RSCRIPTS/apply-da-mods.r $fsetname $dataset $corpus $datadir $moddataset $moddatadir $modcorpus $wordfile $wtype
 
 

@@ -15,9 +15,15 @@ if(length(args)==0){
 	window.type <- args[4]
 	spk.only <- as.logical(args[5])
 	featset <- args[6] 	## e.g. tf.pros
+
+	if (length(args) == 7) {
+		windowdir <- args[7] 		
+	} else {
+		windowdir <- paste(segsdir, "/", window.type, "/", sep="")		
+	}
 	
 	## Get windows		
-	windowfile <- paste(segsdir, "/", window.type, "/", currconv, ".conv.", window.type, sep="")		
+	windowfile <- paste(windowdir, "/", currconv, ".conv.", window.type, sep="")		
 	windowobj <- load(windowfile)
 	x.list <- get(windowobj)
 

@@ -98,7 +98,7 @@ read.lex.pros <- function(prosdir="/disk/scratch/ami/derived/segs/f0", pattern="
 get.feats.main <- function(corpus=c("ami", "icsi", "ted"), datadir="~/data/ami/derived/", 
 		lexsets=c("tf-if-slope-0.0.all_9-72", "tfsp-if-slope-0.0.all_12-96","if-0.0.all_8-72"), 
 		pscores=F, head=F, outfile="ami.group.fx0.wsw", 
-		manual.eda=T, lextype="lex", lexsuffix=".da.spk.txt", prefix="")
+		manual.eda=T, lextype="lex", lexsuffix=".da.spk.txt", prefix="", wtype="asrutt")
 {
 	lexdir <- paste(datadir, "/segs/", lextype, "/", sep="")
 	
@@ -114,14 +114,14 @@ get.feats.main <- function(corpus=c("ami", "icsi", "ted"), datadir="~/data/ami/d
 	fsets <- c("f0")
 	print(fsets)
 	prosdir <- paste(datadir, "/segs/f0/", sep="")
-	xcorpus.f0 <- collate.tf.pros(fsets, fdir=prosdir, suffix="-da.4.4.all.txt", prefix=prefix)
+	xcorpus.f0 <- collate.tf.pros(fsets, fdir=prosdir, suffix=paste("-", wtype, ".4.4.all.txt", sep=""), prefix=prefix)
 	setkey(xcorpus.f0, niteid)
 
 	print("== intensity ===")
 	fsets <- c("i0")
 	print(fsets)
 	prosdir <- paste(datadir, "/segs/i0/", sep="")
-	xcorpus.i0 <- collate.tf.pros(fsets, fdir=prosdir, suffix="-da.4.4.all.txt", prefix=prefix)
+	xcorpus.i0 <- collate.tf.pros(fsets, fdir=prosdir, suffix=paste("-", wtype, ".4.4.all.txt", sep=""), prefix=prefix)
 	xcorpus.i0 <- xcorpus.i0[,grep("wstart", names(xcorpus.i0), invert=T, value=T), with=F]
 	xcorpus.i0 <- xcorpus.i0[,grep("wend", names(xcorpus.i0), invert=T, value=T), with=F]
 	setkey(xcorpus.i0, niteid)
@@ -286,12 +286,14 @@ if(length(args)==0){
 	pscores <- as.logical(args[4])
 	lextype <- args[5]
 	prefix <- args[6]
+	wtype <- args[7]
 
 	print("Proc feats")
 	print(prefix)
 
 	if (fsetname == "aug.wsw") {
-		fsets <- c("tf-if-slope-0.0.all_9-72", "tfsp-if-slope-0.0.all_12-96","if-0.0.all_8-72")
+		#fsets <- c("tf-if-slope-0.0.all_9-72", "tfsp-if-slope-0.0.all_12-96","if-0.0.all_8-72")
+		fsets <- c("tf-if-slope-0.0.all_9-72")
 	} else if (fsetname == "aug.sw") {
 		fsets <- c("tfsp-if-sw-slope-0.0.all_12-120","if-sw-0.0.all_8-80",
 			"tf-if-sw-slope-0.0.all_9-90", "tfsp-sw-0.0.all_4-16")
@@ -305,7 +307,7 @@ if(length(args)==0){
 		return(1)
 	}
 
-	outfile <- paste(datadir, "/da-feats/", prefix, ".", corpus, ".group.fx0.", fsetname, sep="")
+	outfile <- paste(datadir, "/da-feats/", prefix, ".", corpus, ".group.fx0.", fsetname, ".", wtype, sep="")
 	print(outfile)
 
 	if (corpus %in% c("ami", "icsi")) {
@@ -316,10 +318,11 @@ if(length(args)==0){
 		lexsuffix <- ".utt.spk.txt"
 	} else {
 		manual.eda <- F
-		lexsuffix <- ".asrutt.spk.txt"
+		#lexsuffix <- ".asrutt.spk.txt"
+		lexsuffix <- paste(".", wtype, ".spk.txt", sep="")	
 	}
 	print(c(corpus, manual.eda, lexsuffix))
 	get.feats.main(corpus=corpus, datadir=datadir, lexsets=fsets, pscores=pscores, head=F, outfile=outfile, 
-		manual.eda=manual.eda, lextype=lextype, lexsuffix=lexsuffix, prefix=prefix)
+		manual.eda=manual.eda, lextype=lextype, lexsuffix=lexsuffix, prefix=prefix, wtype=wtype)
 }
 print("END")

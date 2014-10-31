@@ -158,7 +158,7 @@ collate.tf.feats <- function(xprops, var.names, prev.window=0, next.window=0) {
 				}
 				list(value=(curr.tval-value))
 				},by=variable]	
-			delta.vals$variable <- paste("delta",unlevel(delta.vals$variable),sep=".")
+			delta.vals$variable <- paste("delta",delta.vals$variable,sep=".")
 			curr.vals.wide <- c(curr.vals.wide, t(delta.vals$value))
 			curr.vnames <- c(curr.vnames, paste(delta.vals$variable, (c(0:(length(delta.vals$variable)-1)) %% nwords ), sep=".")) 
 		}

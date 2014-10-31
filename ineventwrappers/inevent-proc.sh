@@ -159,17 +159,20 @@ qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv $SGESCRIPTS/get-ed-aug-l
 ## Utterance level prosody delta features 
 # -N get-tfseq-$featname-$conv -hold_jid get-pwin-$featname-asrutt-$conv
 ## $featname={i0,f0} 
-./inevent-pros-da-aggs.sh $conv
+fsuffix=".aggs.asrutt.txt"
+./inevent-pros-da-aggs.sh $conv $fsuffix 
 
 #------------------------------------------------
 
 ## Gather lexical features for utterance level prediction 
 ## -N get-fx0-$fsetname-$prefix -hold_jid get-aug-$prefix,get-tfseq-i0-$prefix,get-tfseq-f0-$prefix
-./inevent-lex-feats-sub.sh "aug.wsw" $conv 
+./inevent-lex-feats-sub.sh "aug.wsw" $conv asrutt
 
 ## Apply AMI DA models
 ## -N apply-mod-$dataset -hold_jid get-fx0-$fsetname-$conv  
 ## fsetname="aug.wsw"
+
+./inevent-apply-mods-sub.sh "aug.wsw" "$conv.$CORPUS.group.fx0.aug.wsw.asrutt" "ami.group.fx0.aug.wsw"
 
 ./inevent-apply-mods-sub.sh "aug.wsw" "$conv.$CORPUS.group.fx0.aug.wsw" "ami.group.fx0.aug.wsw"
 ./inevent-apply-mods-sub.sh "da.bare" "$conv.$CORPUS.group.fx0.aug.wsw" "ami.group.fx0.aug.wsw"
