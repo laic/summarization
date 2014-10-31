@@ -3,18 +3,20 @@ SGEDIR=../sgescripts/
 
 FEATNAME=$1
 CONV=$2
+DATADIR=$3
 
 CORPUS=inevent
-DATADIR=$HOME/data/$CORPUS/derived/
+#DATADIR=$HOME/data/$CORPUS/derived/
 SEGSDIR=$DATADIR/segs/
-CONVDIR=$DATADIR/wavutts/
+#CONVDIR=$DATADIR/wavutts/
 UTTDIR=$DATADIR/asrutt/
 
 echo "*** get-pros-norm: $CONV ***"
-echo $CONVDIR
+#echo $CONVDIR
 
-d=$CONVDIR/$CONV/
-echo $d
+#d=$CONVDIR/$CONV/
+#echo $d
+
 SPURTFILE=$UTTDIR/$CONV.asrspurts.txt
 echo $CONV $FEATNAME $SEGSDIR $SPURTFILE
 

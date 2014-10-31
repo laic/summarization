@@ -8,8 +8,8 @@
 # Initialise environment module
 
 . /etc/profile.d/modules.sh
-#export PATH=$HOME/summarization/ineventwrappers/:$PATH
-
+export PATH=/disk/data1/clai/local/bin:$PATH
+export HOME=/disk/data1/clai/
 # Run the program
 
 SCRIPTDIR="../bashscripts/"
@@ -28,5 +28,4 @@ fi
 
 . $SCRIPTDIR/extract-spurt-feats.sh $spurtfile $spurtdir $indir 
 
-exit 0
 

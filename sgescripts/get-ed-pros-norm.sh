@@ -9,7 +9,7 @@
 
 . /etc/profile.d/modules.sh
 
-export PATH=~/local/bin:$PATH
+export PATH=/disk/data1/clai/local/bin/:~/local/bin:$PATH
 #module load R
 # Run the program
 

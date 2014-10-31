@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #$ -N apply-punc-mod
-#$ -pe memory-2G 2
 #$ -P inf_hcrc_cstr_inevent
 #$ -cwd
 #$ -o ./edout
@@ -11,8 +10,9 @@
 
 . /etc/profile.d/modules.sh
 
-export PATH=~/local/bin:$PATH
+export PATH=/disk/data1/clai/local/bin:~/local/bin:$PATH
 
+# -pe memory-2G 2
 # Run the program
 
 filename=$1

@@ -2,7 +2,8 @@
 ## writing out data as flat files.
 ## (but some other stuff has crept in it seems)
 
-source("../rscripts/f0basics.r")
+#source("../rscripts/f0basics.r")
+source("../rscripts/basics.r")
 library(data.table)
 library(intervals)
 library(XML)

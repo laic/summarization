@@ -9,7 +9,7 @@
 
 . /etc/profile.d/modules.sh
 
-export PATH=~/local/bin:$PATH
+export PATH=/disk/data1/clai/local/bin:~/local/bin:$PATH
 
 # Run the program
 # -pe memory-2G 2
@@ -20,6 +20,8 @@ infofile=$3
 
 #export DATADIR=$DATADIR
 #export DATADIR="~/data/inevent/derived/"
+
+echo `which R`
 
 Rscript ../rscripts/get-new-json.r $filename $corpus $infofile 
 

@@ -152,11 +152,12 @@ get.pos.tags <- function(currwords, no.stops=F) {
 }
 
 get.pos.tok.overlap <- function(tw.dt, pw.dt, tw.id="wid") { 
-	tw.int <- Intervals(tw.dt[,list(start,end)])
+	tw.int <- Intervals(as.matrix(tw.dt[,list(start,end)]))
 	pw.int <- Intervals(pw.dt[,list(start,end)])
 	v <- interval_overlap(tw.int, pw.int)
 	names(v) <- tw.dt[[tw.id]]
 	u <- ldply(v, function(x) {pw.dt[x]})
+	print("end pos.tok.overlap")
 	return(data.table(u))
 }
 
@@ -212,18 +213,21 @@ get.autopunc.words <- function(filename, punctree, word.var="wordId", start.var=
 	punctreePred <- predict(punctree, pos.cont)
         #punctreeProbs <- data.table(pos.words, predict(punctree, pos.cont, type ="prob"), pred.class=predict(punctree,pos.cont,type ="class"))
         punctreeProbs <- data.table(pos.words, predict(punctree, pos.cont, type ="prob"))
-	#save(punctreeProbs, file=paste(fstem, ".tree.probs", sep=""))
+	save(punctreeProbs, file=paste(fstem, ".tree.probs", sep=""))
 
+	print("tok.words")
 	## Match up with original word list, since pos.words have some contraction splitting.	
 	tok.words <- ptag.list[["tok.words"]]
 
 	## Add external ids if we have them
 	tok.words$wid <- words.dt$niteid
 
+	print("get.pos.tok.overlap")
 	currw <- get.pos.tok.overlap(tok.words, punctreeProbs)
 	setnames(currw, ".id", "wid")
 	currw$id <- as.numeric(currw$id)
 
+	print("Get new sentence labels")
 	## Get new sentence labels
 	sent.ends <- currw[STOP > threshhold, id]
 	sent.starts <- c(min(currw[, id]), head(sent.ends+1, -1))
@@ -233,6 +237,7 @@ get.autopunc.words <- function(filename, punctree, word.var="wordId", start.var=
 	sw.list <- interval_overlap(s.int, w.int)
 	names(sw.list) <- paste("sentence.", s.dt$sid, sep="")
 
+	print("to data.table")
 	currsw <- data.table(ldply(sw.list, function(x) {currw[x]}))
 	setnames(currsw, ".id", "sid")
 
@@ -247,7 +252,9 @@ get.autopunc.words <- function(filename, punctree, word.var="wordId", start.var=
 
 	currsw <- currsw.times[currsw]	
 
+	print(paste(dirname(filename), "/", currsw$conv[1], ".autopunc.words.txt", sep=""))
 	write.table(currsw, file=paste(dirname(filename), "/", currsw$conv[1], ".autopunc.words.txt", sep=""))
+	print("HERE")
 	return(currsw)
 }
 

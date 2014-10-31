@@ -1,7 +1,7 @@
 ## Helper functions for calculating lexical term-frequency features.
 ## Used in: get-tf-feats.r 
 
-source("../rscripts/f0basics.r")
+source("../rscripts/basics.r")
 source("../rscripts/nxt-proc.r")
 source("../rscripts/term-freq.r")
 library(plyr)

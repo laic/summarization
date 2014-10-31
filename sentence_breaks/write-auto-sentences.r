@@ -1,7 +1,7 @@
 #options( java.parameters = "-Xmx100m" )
 library(data.table)
 library(plyr)
-source("../rscripts/f0basics.r")
+source("../rscripts/basics.r")
 source("../rscripts/nxt-proc.r")
 
 write.html.trans <- function(sents.conf, outfile, id.var="niteid") {

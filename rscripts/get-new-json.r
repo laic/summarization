@@ -1,11 +1,11 @@
 ## Text processing for a new conv
-source("../rscripts/f0basics.r")
+source("../rscripts/basics.r")
 source("../rscripts/read-json.r")
 source("../rscripts/nxt-proc.r")
 #source("~/scripts/proc-lex.r")
 library(data.table)
 library(plyr)
-library(tm)
+#library(tm)
 
 get.lex.from.json <- function(filename, corpus="inevent", 
 	vidsrc=tolower(gsub("[^A-Z]", "", basename(filename))), 
@@ -19,7 +19,7 @@ get.lex.from.json <- function(filename, corpus="inevent",
         ## Get segments and words from json file
 	print("=== read.json ===")
         words.dt <- read.json(filename=filename, info.dt=info.dt)
-
+	print(words.dt)
 	## Write out utterance times in flat format
 	print("=== write utts times ===")
 	uttdir <- paste(datadir, "/asrutt/", sep="")
@@ -29,6 +29,10 @@ get.lex.from.json <- function(filename, corpus="inevent",
         }
 
         utts <- unique(words.dt[,list(conv, longconv, wav.file, video.file, niteid=seg.id, spk=speakerId, starttime=startTime, endtime=endTime)])
+	print("NA spks?")
+	print(utts[!is.na(spk)])
+	print("***")
+
 	if (is.factor(utts$conv)) { utts$conv <- unlevel(utts$conv)}
         #utts <- data.table(utts, participant=utts[,unlist(lapply(strsplit(longconv, split="_"), function(x) {x[1]}))])
         utts <- data.table(utts, participant=utts$spk)
@@ -60,7 +64,6 @@ get.lex.from.json <- function(filename, corpus="inevent",
                 print(worddir)
         }
 
-
 	setnames(words.dt, c("word.id","startTime","endTime","speakerId","wordStart","wordEnd","wordId"),
 		c("niteid","starttime","endtime","spk","wstart","wend","word"))
 	write.features.by.conv(words.dt, dirname=worddir, fsuffix=".raw.asrword", plain.txt=F)
@@ -84,7 +87,7 @@ info.file <- args[3]
 datadir <- Sys.getenv("DATADIR") 
 if (datadir=="") {
 	print("No DATADIR in environment. Set to default.")
-	datadir <- paste("~/data/", corpus, "/derived/", sep="")
+	datadir <- paste(dirname(filename), "/derived/", sep="")
 	print(paste("datadir:", datadir)) 
 } 
 
@@ -94,6 +97,8 @@ if (!file.exists(datadir)) {
 }
 
 vidsrc <- tolower(gsub("[^A-Z]", "",  basename(filename)))
+if (vidsrc=="") {vidsrc <- "inevent"}
+
 get.lex.from.json(filename, corpus="inevent", vidsrc=vidsrc, 
 	filelist=info.file, 
 	datadir=datadir)  

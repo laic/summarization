@@ -1,14 +1,15 @@
 #!/bin/bash
 
 SGEDIR=../sgescripts/
-ineventdir=/exports/home/clai/data/inevent/
-datadir=$ineventdir/derived/
-wavdir=$ineventdir/wav/
+
+PREFIX=$1
+wavdir=$2
+datadir=$3
+
 segdir=$datadir/asrutt/
 spurtdir=$datadir/wavutts/
 spurttype="asrspurts"
 
-PREFIX=$1
 
 echo "*** get-spurt-feats start ***"
 
@@ -22,8 +23,6 @@ then
         ln -s  $spurtdir $datadir/segs/conv
 fi
 
-#for file in $segdir/$PREFIX*$spurttype.txt
-#do
 file=$segdir/$PREFIX.$spurttype.txt
 echo $file $spurtdir $wavdir
 echo "Name: get-spurt-feats-$PREFIX"
@@ -32,7 +31,6 @@ qsub -N get-spurt-feats-$PREFIX -hold_jid get-new-json-$PREFIX  $SGEDIR/get-ed-s
 #$SGEDIR/get-ed-spurt-feats.sh $file $spurtdir $wavdir
 
 
-#done
 
 
 

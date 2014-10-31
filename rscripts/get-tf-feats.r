@@ -1,5 +1,5 @@
 ## Text processing for a new conv
-source("../rscripts/f0basics.r")
+source("../rscripts/basics.r")
 source("../rscripts/nxt-proc.r")
 source("../rscripts/proc-lex.r")
 library(data.table)
@@ -106,13 +106,14 @@ corpus <- args[2]
 idf.conv.file <- args[3] 
 idf.spk.file <- args[4]
 pmi.file <- args[5]
+datadir <- args[6]
 
-datadir <- Sys.getenv("DATADIR")
-if (datadir=="") {
-        print("No DATADIR in environment. Set to default.")
-        datadir <- paste("~/data/", corpus, "/derived/", sep="")
-        print(paste("datadir:", datadir))
-}
+#datadir <- Sys.getenv("DATADIR")
+#if (datadir=="") {
+#        print("No DATADIR in environment. Set to default.")
+#        datadir <- paste("~/data/", corpus, "/derived/", sep="")
+#        print(paste("datadir:", datadir))
+#}
 
 if (!file.exists(datadir)) {
         dir.create(datadir, recursive=T)

@@ -1,4 +1,5 @@
-#options( java.parameters = "-Xmx100m" )
+#options( java.parameters = "-Xmx100m" )#
+library(methods)
 source("../sentence_breaks/punc-classifier.r")
 
 ################################################
