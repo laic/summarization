@@ -288,13 +288,14 @@ get.tfidf.docs.conv <- function(xdt, windows, spk.only=T) {
 
 ## This works but its all a bit clunky! Redo 
 get.tfidf.docs.window <- function(x, xprops, spk.only=F) {
-        #print("TFIDF")
+        print("TFIDF")
         currstart <- unique(x$wstarts)
         currend <- unique(x$wends)
         currconv <- unique(xprops$conv)
         extra.words <- 0
         currspk <- get.niteid.spk(unique(x$niteid))
 
+	print(c(currstart, currend, currconv, currspk)) 
 
         if (length(currend) >1) {
                 print(x)

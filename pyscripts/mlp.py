@@ -211,7 +211,7 @@ class MLP(object):
         """
             set the network parameters from given dict
         """       
-
+	print "set_params"
 	for layer in self.sigmoid_layers:     
 		lname = layer.layername 
 		print lname
@@ -221,6 +221,7 @@ class MLP(object):
 				param.set_value(value)
 
 	lname = self.logRegressionLayer.layername 
+	print lname
 	for name, value in params[lname].items():
 		for param in self.logRegressionLayer.params:
 			if param.name == name:

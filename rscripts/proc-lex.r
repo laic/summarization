@@ -13,18 +13,24 @@ collect.tf.feats <- function(x.nxtwords.dt0, word.idf.spk, word.idf.conv, outdir
 	## tf.idf.spk: each speaker side as a separate document.
 	print("tf.idf.spk")
         x.tf.idf <- get.tfidf.spk(x.nxtwords.dt0, word.idf=word.idf.spk)
+	print(names(x.tf.idf))
 
+	print("-----")
 	print("tf.idf.grp")
         x.tf.idf.grp <- get.tfidf.grp(x.nxtwords.dt0, word.idf=word.idf.conv)
+	print(names(x.tf.idf.grp))
+
+	print("-----")
 
 	print("su.idf")
         x.su.idf <- get.su.idf(x.nxtwords.dt0, x.tf.idf)
 
 	## add tf.idf.spk to transcript words 
+	setnames(x.tf.idf, c("tcount","tf","idf","tf.idf"), c("tcount.spk","tf.spk","idf.spk","tf.idf.spk"))
         setkey(x.nxtwords.dt0, conv, spk, clean.word)
         setkey(x.tf.idf, conv, spk, clean.word)
-        x.lex <- x.tf.idf[x.nxtwords.dt0][!is.na(tf)]
-		
+        x.lex <- x.tf.idf[x.nxtwords.dt0][!is.na(tf.spk)]
+
 	## add su.idf
         setkey(x.lex, conv, clean.word)
         setkey(x.su.idf, conv, clean.word)
@@ -33,7 +39,20 @@ collect.tf.feats <- function(x.nxtwords.dt0, word.idf.spk, word.idf.conv, outdir
 	## add tf.idf.grp 
         setkey(x.lex.su, conv, clean.word)
         setkey(x.tf.idf.grp, conv, clean.word)
-        x.lex.grp <- x.tf.idf.grp[x.lex.su][!is.na(tf)]
+	print("-----")
+	print("-----")
+	print("-----")
+	print(names(x.lex.su))
+	print("-----")
+	print(names(x.tf.idf.grp))
+
+        x.lex.grp <- x.tf.idf.grp[x.lex.su][!is.na(tf.spk)]
+	print("-----")
+	print(names(x.lex.grp))
+	print("-----")
+	print(gsub(".1$", ".spk", names(x.lex.grp)))
+	print("-----")
+
         setnames(x.lex.grp, names(x.lex.grp), gsub(".1$", ".spk", names(x.lex.grp)))
 
 	return(x.lex.grp)

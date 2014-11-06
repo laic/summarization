@@ -10,11 +10,10 @@
 
 . /etc/profile.d/modules.sh
 
-export PATH=~/local/bin/:$PATH
+export PATH=/disk/data1/clai/local/bin:~/local/bin/:$PATH
 RSCRIPTS="../rscripts/"
-# Run the program
-# -pe memory-2G 2
 
+# Run the program
 fsetname=$1
 dataset=$2
 corpus=$3

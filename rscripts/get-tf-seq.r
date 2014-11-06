@@ -1,17 +1,13 @@
 #!/usr/bin/Rscript --vanilla --slave
 
 source("../rscripts/nxt-proc.r")
-
 library(data.table)
 library(plyr)
 library(reshape2)
 
-#curr.var.names <- c("niteid", "wstart", "tf.idf", "su.idf", "sqrt.idf",
-#			"mean.normF0", "sd.normF0", "q2.5.normF0", "q97.5.normF0", 
-#			"mean.normI0", "sd.normI0", "q2.5.normI0", "q97.5.normI0") 
-
 
 no.norm <- c("niteid","wstart","wend","silence")
+
 znorm.by.window <- function(x, var.names, wpercent=0.25) {
 	no.norm <- c("niteid","wstart","wend","silence",grep("lbp",var.names,value=T))
 	print("znorm")
@@ -390,16 +386,11 @@ if(length(args)==0){
 	print(outfile.txt)
 	write.table(x.tf, file=outfile.txt, row.names=F, quote=F)	
 
-#	print(zoutfile.txt)
-#	write.table(z.tf, file=zoutfile.txt, row.names=F, quote=F)	
 
-	##  Dump to one directory.
-	outfile.all <- paste(segsdir, "/", featname, "/", currconv, ".", var.id, "-", prev.window, ".", next.window, ".all.txt", sep="")		
+	##  Dump in feature segs directory.
+	outfile.all <- paste(segsdir, "/", featname, "/", currconv, ".", var.id, "-", prev.window, ".", next.window, ".all.txt", sep="")
 	print(outfile.all)
 	write.table(x.tf, file=outfile.all, row.names=F, quote=F)	
-
-#	zoutfile.all <- paste(segsdir, "/", featname ,"/", currconv, ".", var.id, ".", prev.window, ".", next.window, ".all.zw.txt", sep="")
-#	write.table(z.tf, file=zoutfile.all, row.names=F, quote=F)	
 
 }
 print("END")

@@ -8,7 +8,7 @@
 
 . /etc/profile.d/modules.sh
 
-export PATH=$HOME/local/bin:$PATH
+export PATH=/disk/data1/clai/local/bin:$HOME/local/bin:$PATH
 
 RSCRIPTS=../rscripts/
 # Run the program

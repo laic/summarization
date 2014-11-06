@@ -3,6 +3,7 @@ library(plyr)
 source("../rscripts/f0basics.r")
 source("../rscripts/extsumm-eval.r")
 source("../rscripts/proc-lme.r")
+source("../rscripts/write-json.r")
 library(xtable)
 library(arm)
 
@@ -1280,21 +1281,13 @@ get.fset.mods <- function(group.fx0, fset, fsetname, write.summary=F,
 	print(x.dev.stats)
 	write.table(x.dev.stats, file=paste(evaldir, "/", corpus, ".", fsetname, ".dev.stats.txt", sep=""))
 
-	## Write ROUGE style summaries, if you want.
-	## We do it quicker with another function later...?
-#	if (write.summary) {
-#		feat.sums <- lapply(x.dev, write.fset.summary, da.text=da.text, compression=0.15, data.part="dev", 
-#				outdir=paste(sevaldir, "/devsystems/", sep=""))
-#		feat.sums <- lapply(x.dev, write.fset.summary, da.text=da.text, compression=0.15, data.part="test", 
-#				outdir=paste(sevaldir, "/systems", sep=""))
-#	}
 }
 
 apply.fset.mods <- function(group.fx0, fsetname,
                 evaldir="~/data/ted/derived/segs/reval/",
                 moddir="~/data/ted/derived/mods/",
                 sevaldir="~/data/ted/derived/summeval/",
-                corpus="ted", mod.corpus="ami", dset="conv", wtype="da")
+                corpus="ted", mod.corpus="ami", dset="conv", wtype="da", write.preds=T, write.json=T)
 {
 
         ## load model
@@ -1302,7 +1295,6 @@ apply.fset.mods <- function(group.fx0, fsetname,
         print(modfile)
         modobj <- load(modfile)
         x.mods <- get(modobj)
-
 
         ## get predictions 
         lapply(x.mods, function(x) {
@@ -1320,24 +1312,29 @@ apply.fset.mods <- function(group.fx0, fsetname,
 
 		print("get.eda.true")
                 curr.pred <- get.eda.true.pred(m$mod, test.set, corpus=F, spk=F)
-                #curr.pred <- data.table(test.set[,list(niteid, wid, conv, starttime, endtime, nwords, annot,eda.true=link.eda)],
                 curr.pred <- data.table(test.set[,list(niteid, wid, conv, starttime, endtime, annot,eda.true=link.eda)],
                                                         logit.val=curr.pred[,1])
 
-		print(paste("XXX", nrow(curr.pred)))
-		#print(names(group.fx0))
 		if ("trans" %in% names(group.fx0)) {
                 	test.text <- group.fx0[, list(niteid, trans)]
 		} else {
                 	test.text <- group.fx0[, list(niteid, text)]
 		}
-		print("HERE")	
                 setkey(curr.pred, niteid)
                 setkey(test.text, niteid)
                 curr.pred <- curr.pred[test.text]
                 curr.pred <- curr.pred[order(conv, logit.val, starttime, decreasing=T)]
-                predfile <- paste(evaldir, "/", dset, ".", x$fsetname, ".", wtype, ".eval.txt", sep="")
-                write.table(curr.pred, file=predfile)
+
+		if (write.preds) {
+			predfile <- paste(evaldir, "/", dset, ".", x$fsetname, ".", wtype, ".eval.txt", sep="")
+			write.table(curr.pred, file=predfile)
+		}
+
+		if (write.json) {
+			jsonfile <- paste(evaldir, "/", dset, ".", x$fsetname, ".", wtype, ".json", sep="")
+			curr.pred.json <- summary.probs.to.json(curr.pred)
+			write(curr.pred.json, file=jsonfile)
+		}
 
                 return(curr.pred)
 

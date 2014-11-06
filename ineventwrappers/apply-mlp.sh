@@ -11,10 +11,11 @@
 
 . /etc/profile.d/modules.sh
 
-module load python
-module load cuda
+#module load python
+#module load cuda
 
-export THEANO_FLAGS='cuda.root=/exports/applications/apps/cuda/rhel6/5.0/,device=cpu,pycuda.init=False,gcc.cxxflags=-m64 -L/usr/lib64/atlas/ -L/usr/lib64/,blas.ldflags=-lf77blas -latlas -lgfortran,on_unused_input=ignore'
+export THEANO_FLAGS='device=cpu,pycuda.init=False,gcc.cxxflags=-m64 -L/usr/lib64/atlas/ -L/usr/lib64/,blas.ldflags=-lf77blas -latlas -lgfortran,on_unused_input=ignore'
+
 
 # Run the program
 
@@ -34,8 +35,11 @@ testonly=$6
 #hname=`echo $hlayers | tr " " "_"`
 #outfile="${corpus}_mlp_${dstem}_${n_in}-$hname.pkl"
 
+echo "apply-mlp.sh"
 echo $infile
 echo $outfile
 
 python $PYSCRIPTS/mlp.py $infile $outfile $n_in $testonly $model $hlayers
+
+
 

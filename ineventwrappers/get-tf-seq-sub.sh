@@ -7,7 +7,7 @@ prevwindow=0
 nextwindow=0
 includehead=F			# include head movement velocities
 fsuffix=".tf.allpros.txt"	# suffix of features files
-datadir=/exports/home/clai/data/inevent/derived/segs/
+datadir=/disk/data3/inevent/	# on eddie set directory to: exports/home/clai/data/inevent/derived/segs/
 prefix=""			# Restrict the set we're working on
 
 

@@ -1,15 +1,15 @@
 #!/bin/bash
 
-#SGESCRIPTS="../sgescripts/"
+SGESCRIPTS="../sgescripts/"
 
 fsetname=$1
 dataset=$2
 corpus=inevent
-datadir=/exports/home/clai/data/inevent/derived/
 moddataset=$3 # "ami.group.fx0.wsw"
-moddatadir=/exports/home/clai/data/ami/derived/
-modcorpus=ami
 wtype=$4
+datadir=$5 #/exports/home/clai/data/inevent/derived/
+moddatadir=$6 #/exports/home/clai/data/ami/derived/
+modcorpus=ami
 
 conv=`echo $dataset | cut -d "." -f1`
 echo wtype=$wtype
@@ -21,14 +21,14 @@ else
 fi
 
 
-dset=`echo $dataset | sed s/.fx0./-/g | cut -d "-" -f2`
-echo "***************************"
-echo $dset 
+#dset=`echo $dataset | sed s/.fx0./-/g | cut -d "-" -f2`
+#dset=`echo $dataset | sed s/.fx0./-/g | cut -d "-" -f2`
+#echo $dset 
 
+echo "***************************"
 echo $fsetname $dataset $corpus $datadir $moddataset $moddatadir $wordfile
 echo "Name: apply-mod-$dataset" 
-echo "holds: get-fx0-$dset-$conv"
+echo "holds: get-fx0-$fsetname-$conv"
 
-qsub -N apply-mod-$dataset -hold_jid get-fx0-$dset-$conv $SGESCRIPTS/get-ed-apply-mods.sh $fsetname $dataset $corpus $datadir $moddataset $moddatadir $modcorpus $wordfile $wtype
+qsub -N apply-mod-$dataset -hold_jid get-fx0-$fsetname-$conv-$wtype $SGESCRIPTS/get-ed-apply-mods.sh $fsetname $dataset $corpus $datadir $moddataset $moddatadir $modcorpus $wordfile $wtype
 
-#$SGESCRIPTS/get-ed-apply-mods.sh $fsetname $dataset $corpus $datadir $moddataset $moddatadir $modcorpus $wordfile $wtype

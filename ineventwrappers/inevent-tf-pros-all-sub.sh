@@ -2,15 +2,16 @@
 
 SGEDIR=../sgescripts/
 
-datadir=~/data/
-corpus=inevent
-segsdir=$datadir/$corpus/derived/segs/
+#datadir=~/data/
+#corpus=inevent
 wprefix=""
 rmstop=T	# set stopwords tf.idf and su.idf values to zero
 
 wtype="$1"	# asr,  manual  
 conv=$2		 
 segfile=$3
+#segsdir=$datadir/$corpus/derived/segs/
+segsdir=$4	
 
 echo $conv $wtype $segfile
 
