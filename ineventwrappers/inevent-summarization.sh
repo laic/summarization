@@ -204,5 +204,5 @@ wtype="autosent0.7"
 
 #./inevent-apply-mods-sub.sh "da.bare" "$conv.$CORPUS.group.fx0.aug.wsw" "ami.group.fx0.aug.wsw"
 #cp $segsdir/reval/ami.group.fx0.aug.wsw/$conv.tf.pros_pros.asrutt.json $EVENTDIR/$conv.asrutt.extsumm.json
-cp $segsdir/reval/ami.group.fx0.aug.wsw/$conv.tf.pros_pros.autosent0.7.json $EVENTDIR/$conv.quotes.json
+#cp $segsdir/reval/ami.group.fx0.aug.wsw/$conv.tf.pros_pros.autosent0.7.json $EVENTDIR/$conv.quotes.json
 

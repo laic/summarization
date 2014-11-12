@@ -136,6 +136,8 @@ echo $teststem
 
 
 # Join back with identifiers, niteid etc.
+
+echo "---- get-word-ids ---------" 
 probfname=$testsetdir/${corpus}_mlp_${fset}_${n_in}-${hsize}.prob.eval.txt
 idfname=$testsetdir/$featname-eval.txt
 lexdir=$segsdir/${lextype}lex/

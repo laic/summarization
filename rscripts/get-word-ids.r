@@ -29,6 +29,8 @@ merge.conv.features <- function(x, featset, lexdir="~/data/icsi/derived/segs/lex
 
 
 	outfile.txt <- paste(lexdir, "/", currconv, ".", featname, ".txt", sep="") 
+	print("merge.conv.features")
+	print(outfile.txt)
 	write.table(xprobs, outfile.txt, row.names=F)
 
 }
