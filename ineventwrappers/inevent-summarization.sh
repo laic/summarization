@@ -111,12 +111,10 @@ wordvar=word
 startvar=wstart
 wordid=niteid
 
-#$SGESCRIPTS/get-ed-apply-punc.sh $wordfile $punctreefile $wordvar $startvar $wordid
 qsub -N get-autopunc-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-apply-punc.sh $wordfile $punctreefile $wordvar $startvar $wordid
 
 sentfile=$datadir/asrword/$conv.autopunc.words.txt
 qsub -N get-auto-sent-$conv -hold_jid get-autopunc-$conv $SGESCRIPTS/get-ed-auto-sent.sh $sentfile $datadir
-#$SGESCRIPTS/get-ed-auto-sent.sh $sentfile $datadir
 
 
 qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-feats.sh $conv $CORPUS $datadir

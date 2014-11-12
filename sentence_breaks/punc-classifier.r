@@ -4,6 +4,7 @@ library(data.table)
 require(NLP)
 library(plyr)
 library(intervals)
+source("../rscripts/write-json.r")
 
 get.punctree <- function(posdir, treefile=NULL, train.prop=NA) {
 	filenames <- list.files(posdir, pattern=".pos$", full.names=T)
@@ -186,7 +187,7 @@ get.pos.context <- function(pos.words, nprev=3, nnext=3) {
 	return(pos.dt)
 }
 
-get.autopunc.words <- function(filename, punctree, word.var="wordId", start.var="wordStart", threshhold=0.5, word.id="word.id") {
+get.autopunc.words <- function(filename, punctree, word.var="wordId", start.var="wordStart", threshhold=0.5, word.id="word.id", write.json=T) {
 	fstem <- basename(filename)
 	print(filename)
 	## Get words
@@ -254,20 +255,15 @@ get.autopunc.words <- function(filename, punctree, word.var="wordId", start.var=
 
 	print(paste(dirname(filename), "/", currsw$conv[1], ".autopunc.words.txt", sep=""))
 	write.table(currsw, file=paste(dirname(filename), "/", currsw$conv[1], ".autopunc.words.txt", sep=""))
-	print("HERE")
+
+	if (write.json) {
+		print("Write JSON")
+		currsw.json <- words.dt.to.json(currsw)
+		write(currsw.json, file=paste(dirname(filename), "/", currsw$conv[1], ".autopunc.words.json", sep=""))
+	}
 	return(currsw)
 }
 
-################################################
-#args=(commandArgs(TRUE))
-#print(args)
-#if(length(args)==0){
-#        stop("No arguments supplied. Exiting.")
-#}
-################################################
-#transdir <- args[1]
-
-#transdir <- "~/data/ted/traintrans/"
 
 
 
