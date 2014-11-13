@@ -214,7 +214,7 @@ get.autopunc.words <- function(filename, punctree, word.var="wordId", start.var=
 	punctreePred <- predict(punctree, pos.cont)
         #punctreeProbs <- data.table(pos.words, predict(punctree, pos.cont, type ="prob"), pred.class=predict(punctree,pos.cont,type ="class"))
         punctreeProbs <- data.table(pos.words, predict(punctree, pos.cont, type ="prob"))
-	save(punctreeProbs, file=paste(fstem, ".tree.probs", sep=""))
+	#save(punctreeProbs, file=paste(fstem, ".tree.probs", sep=""))
 
 	print("tok.words")
 	## Match up with original word list, since pos.words have some contraction splitting.	
