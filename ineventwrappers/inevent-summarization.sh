@@ -1,6 +1,19 @@
 #!/bin/bash
+## inevent-summarization.sh: apply extractive summarization to ASR output  
+## input: asr.json wavfile.wav vidfile.mp4 eventdir
+## author: clai 
 
-## Input vars: e.g. TED0069 /disk/data3/inevent/1/
+if [ $# != 4 ]
+then
+  echo usage: $0 asr.json wavfile.wav vidfile.mp4 eventdir
+  exit 1
+fi
+  
+##################################################################
+## Set up variables
+##################################################################
+
+## Input vars
 asrjson=$1
 wavfile=$2
 vidfile=$3
@@ -10,6 +23,9 @@ conv=`basename $asrjson .asr.json`
 echo $asrjson $EVENTDIR $conv
 
 ## Setup for inevent on majestic 
+## We don't actually need to use all these absolute paths since we 
+## run in a subshell from the ineventwrappers directory and everything else
+## is called relatively.
 
 SCRIPTDIR=/disk/data1/clai/work/inevent/summarization/
 INEVENTSCRIPTS=$SCRIPTDIR/ineventwrappers/
@@ -20,8 +36,10 @@ CORPUS="inevent"
 
 datadir=$EVENTDIR/derived/
 wavdir=$EVENTDIR/
-#filename=$EVENTDIR/$conv.json
-#infofile=~/data/$CORPUS/filenames.txt
+
+#######################################################
+## Make directories 
+#######################################################
 
 if [ ! -e $datadir ]
 then
@@ -29,8 +47,8 @@ then
 fi
 
 ## The naming of these directories is a bit historical at this point ##
-#$datadir/segs is where features related to various segments of the meeting ##
-##are stored.  
+## but the rational was that $datadir/segs is where features related to
+## various segments of the meeting ##are stored.  
 if [ ! -e $datadir/segs ]
 then
 	mkdir $datadir/segs
@@ -59,7 +77,6 @@ then
 	ln -s $datadir/asrword $datadir/segs/
 fi
 
-
 ## Timing info about utterances based on ASR output 
 if [ ! -e $datadir/asrutt ]
 then
@@ -67,6 +84,7 @@ then
 	ln -s $datadir/asrutt $datadir/segs/
 fi
 
+## Timing info about utterances after resegmentation of  ASR output 
 if [ ! -e $datadir/asrsent ]
 then
 	mkdir $datadir/asrsent
@@ -92,17 +110,27 @@ then
 fi
 
 
-#====================================================================================
-## make infofile
+###################################################################
+## Make a text file with names various hyperevent track files and ids
+## This is just convenient since we were originally running the 
+## inEvent core set as a batch and using a key file created by fmi to   
+## match the events to the various media files.
+##################################################################
+
 echo "id video.file json.file wav.file" > $datadir/$conv.info.txt  
 echo "x `basename $vidfile` `basename $asrjson` `basename $wavfile | sed s/[_-]//g`" >> $datadir/$conv.info.txt
 cat $datadir/$conv.info.txt | sed 's/ /\t/g' > $datadir/info.txt
 mv $datadir/info.txt $datadir/$conv.info.txt
 infofile=$datadir/$conv.info.txt
-## Get lexical word and utterance timings and calculate  lexical features 
-## sge: get-new-json-$conv,  no holds 
 
-echo $SGESCRIPTS
+
+
+##########################################################################
+## Get lexical word and utterance timings and calculate  lexical features 
+##########################################################################
+#echo $SGESCRIPTS
+
+## sge: get-new-json-$conv,  no holds 
 qsub -N get-new-json-$conv $SGESCRIPTS/get-ed-new-json.sh $asrjson $CORPUS $infofile  
 
 wordfile=$datadir/asrword/$conv.raw.asrword.txt
@@ -116,10 +144,12 @@ qsub -N get-autopunc-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-apply
 sentfile=$datadir/asrword/$conv.autopunc.words.txt
 qsub -N get-auto-sent-$conv -hold_jid get-autopunc-$conv $SGESCRIPTS/get-ed-auto-sent.sh $sentfile $datadir
 
-
 qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-feats.sh $conv $CORPUS $datadir
 
-#====================================================================================
+##########################################################################
+## Get prosodic features and aggregates (after getting segmentation data)
+##########################################################################
+
 ## sge: -N get-spurt-feats-$PREFIX -hold_jid get-new-json-$PREFIX
 ## where PREFIX=$conv
 ./inevent-pros-raw-sub.sh $conv $wavdir $datadir 
@@ -127,21 +157,21 @@ qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-fe
 ## Collate and normalize prosodic features  
 ## Outputs one file per conv and feature, e.g. ~/data/inevent/derived/segs/f0/TED0069 
 
-
 ## sge: -N get-pros-norm-$FEATNAME-$PREFIX -hold_jid get-spurt-feats-$PREFIX
-## FEATNAME=f0, PREFIX=$conv
+## FEATNAME=f0|i0, PREFIX=$conv
 ./inevent-pros-norm-sub.sh f0 $conv $datadir
-### FEATNAME=i0, PREFIX=$conv
 ./inevent-pros-norm-sub.sh i0 $conv $datadir
 
+##------------------------------------------------------------
+## Get word/sentence/utt level aggregates 
 ##------------------------------------------------------------
 ## segsdir is the working directory for collecting aggregate features
 segsdir=$datadir/segs/
 
 ## Word level prosodic aggregates
 ## sge: -N get-pwin-$FEATNAME-$WTYPE-$PREFIX -hold_jid get-pros-norm-$FEATNAME-$PREFIX 
-wdir=$datadir/segs/asrword/
 ## window type, feature, conv, window directory, working directory
+wdir=$datadir/segs/asrword/
 ./inevent-pros-window-sub.sh asrword f0 $conv $wdir $segsdir
 ./inevent-pros-window-sub.sh asrword i0 $conv $wdir $segsdir
 
@@ -158,23 +188,10 @@ wdir=$datadir/segs/asrsent/
 ./inevent-pros-window-sub.sh asrsent f0 $conv $wdir $segsdir
 ./inevent-pros-window-sub.sh asrsent i0 $conv $wdir $segsdir
 
-## Deleting lower confidence words 
+## Now based on segmentation after deleting lower confidence words 
 wdir=$datadir/segs/asrsent/
 ./inevent-pros-window-sub.sh "autosent0.7" f0 $conv $wdir $segsdir
 ./inevent-pros-window-sub.sh "autosent0.7" i0 $conv $wdir $segsdir
-
-#------------------------------------------------------------
-## combine term-frequency and prosodic word features
-## sge: -N get-tfpros-$wtype{lex}-$conv -hold_jid get-tf-feats-$conv,get-pwin-i0-${wtype}lex-$prefix,get-pwin-f0-${wtype}lex-$prefix
-## wtype=asr, prefix=$conv 
-wfile="$datadir/segs/asrword/$conv.raw.asrword.txt"
-./inevent-tf-pros-all-sub.sh asr $conv $wfile $segsdir
-
-## Get augmented lexical features
-#echo "Name: get-aug-$conv"
-#echo "holds: get-tfpros-asrlex-$conv"
-
-qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv $SGESCRIPTS/get-ed-aug-lex.sh $conv $segsdir
 
 ## Utterance level prosody delta features 
 # -N get-tfseq-$featname-$conv -hold_jid get-pwin-$featname-asrutt-$conv
@@ -183,8 +200,25 @@ qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv $SGESCRIPTS/get-ed-aug-l
 wtype=asrutt
 ./inevent-pros-da-aggs.sh $conv $wtype $segsdir
 
-#------------------------------------------------
-#
+##########################################################################
+## Get augmented lexical features
+##########################################################################
+
+## combine term-frequency and prosodic word features
+## sge: -N get-tfpros-$wtype{lex}-$conv -hold_jid get-tf-feats-$conv,get-pwin-i0-${wtype}lex-$prefix,get-pwin-f0-${wtype}lex-$prefix
+## wtype=asr, prefix=$conv 
+wfile="$datadir/segs/asrword/$conv.raw.asrword.txt"
+./inevent-tf-pros-all-sub.sh asr $conv $wfile $segsdir
+
+## Apply AMI augmented lexical feature model.
+#echo "Name: get-aug-$conv"
+#echo "holds: get-tfpros-asrlex-$conv"
+qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv $SGESCRIPTS/get-ed-aug-lex.sh $conv $segsdir
+
+
+##########################################################################
+## Apply AMI DA extractive summarizer: diarization segmentation
+##########################################################################
 ## Gather lexical features for utterance level prediction 
 ## -N get-fx0-$fsetname-$prefix -hold_jid get-aug-$prefix,get-tfseq-i0-$prefix,get-tfseq-f0-$prefix
 ./inevent-lex-feats-sub.sh "aug.wsw" $conv asrutt $datadir
@@ -195,12 +229,12 @@ wtype=asrutt
 moddir=/disk/data1/clai/work/inevent/data/ami/derived/
 ./inevent-apply-mods-sub.sh "aug.wsw" "$conv.$CORPUS.group.fx0.aug.wsw.asrutt" "ami.group.fx0.aug.wsw" asrutt $datadir $moddir 
 
+##########################################################################
+## Apply AMI DA extractive summarizer: high confidence contiguous regions
+##########################################################################
 wtype="autosent0.7"
 ./inevent-pros-da-aggs.sh $conv $wtype $segsdir
 ./inevent-lex-feats-sub.sh "aug.wsw" $conv "autosent0.7" $datadir
 ./inevent-apply-mods-sub.sh "aug.wsw" "$conv.$CORPUS.group.fx0.aug.wsw.autosent0.7" "ami.group.fx0.aug.wsw" "autosent0.7" $datadir $moddir 
 
-#./inevent-apply-mods-sub.sh "da.bare" "$conv.$CORPUS.group.fx0.aug.wsw" "ami.group.fx0.aug.wsw"
-#cp $segsdir/reval/ami.group.fx0.aug.wsw/$conv.tf.pros_pros.asrutt.json $EVENTDIR/$conv.asrutt.extsumm.json
-#cp $segsdir/reval/ami.group.fx0.aug.wsw/$conv.tf.pros_pros.autosent0.7.json $EVENTDIR/$conv.quotes.json
 
