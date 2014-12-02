@@ -1,4 +1,4 @@
-summarization
+inEvent Summarization Code
 =============
 
 Tools for extractive summarization based on lexical and prosodic features for the inEvent Project.
