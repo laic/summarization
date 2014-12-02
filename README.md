@@ -19,9 +19,7 @@ It returns a JSON file of time aligned quotes from with extractive summary score
 Note a large amount of extra feature files and debug information is currently produced.
 More documentation will appear in the future.
 
-============================
-Extracting prosodic features 
-============================
+Notes: 
 
 * Although the relevant function is called extract-spurt-feats.sh, we 
 could be using any sort of segment really with a start and endtime.  For this
