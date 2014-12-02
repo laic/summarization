@@ -7,7 +7,7 @@ Most of the code is written in R with bash shell script wrappers.
 Requires: 
 - praat (for prosodic features)
 - R (3.1.1 or higher)
-- Theano (for MLP)
+- python: Theano (for MLP)
 
 The main wrapper is ineventwrappers/inevent-summarization.sh which at the moment takes as input:
 * ASR output in JSON format (Augmented ASR in the inEvent API)
