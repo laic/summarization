@@ -98,7 +98,7 @@ normalize.vals.spk <- function(u, x.aggs, var.name="F0", st=c("mean.val", "q5.va
 	} 
 
         norm.u <- data.table(u, normval=normvals)
-	save(norm.u, file="norm.u")
+	#save(norm.u, file="norm.u")
 	if (remove.spurt.slope==T) {
 		print("removing spurt slope")
 		xslope <- data.table(ddply(norm.u, .(wid), get.slope.correction, xname="Time", yname="normval")) 

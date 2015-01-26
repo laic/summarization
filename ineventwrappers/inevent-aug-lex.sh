@@ -1,18 +1,22 @@
 #!/bin/bash
 # Get features for a single
 #----------------------------------------------------
-NNDIR=../nn/
+#NNDIR=../nn/
 RSCRIPTS=../rscripts/
 SGEDIR=../sgescripts/
+SCRIPTDIR=../ineventwrappers/
 
 ## Current conv
 conv=$1
 varname=$2
-featnames=$3
+segsdir=$3
+nnoutdir=$4
+featnames=$5
+#segsdir=$HOME/data/inevent/derived/segs/
+
 
 ## inevent  vars 
 corpus=inevent
-segsdir=$HOME/data/inevent/derived/segs/
 hashead=F
 lexname=asrlex
 spkonly=F
@@ -52,19 +56,19 @@ featname=$conv.$varname-$pcontext.$ncontext.$normtype
 # Make directories
 #----------------------------------------------------
 
-trainmlpdir=$NNDIR/output/mlp/
-if [ ! -e $trainmlpdir ]
-then
-        echo "mkdir $trainmlpdir" 
-fi
+#trainmlpdir=$nnoutdir/output/mlp/
+#if [ ! -e $trainmlpdir ]
+#then
+#        echo "mkdir $trainmlpdir" 
+#fi
 
-mlpprobdir=$NNDIR/output/mlp/plain/
+mlpprobdir=$nnoutdir/output/mlp/plain/
 if [ ! -e $mlpprobdir ]
 then
         echo "mkdir $mlpprobdir exists" 
 fi
 
-mlpdatadir=$NNDIR/data/$corpus/
+mlpdatadir=$nnoutdir/data/$corpus/
 if [ ! -e $mlpdatadir ]
 then
         echo "mkdir $mlpdatadir" 
@@ -95,7 +99,6 @@ fi
 #./get-tf-seq-sub.sh -x "*2008" $lexname $varname ted "$featnames" 
 includehead=F
 Rscript $RSCRIPTS/get-tf-seq.r $conv $lexname $segsdir $spkonly $pcontext $ncontext $varname $includehead $corpus $fsuffix $featnames
-
 cp $testsetdir/$featname.txt  $testsetdir/$featname-eval.txt
 
 ##----------------------------------------------------------------
@@ -104,7 +107,8 @@ cp $testsetdir/$featname.txt  $testsetdir/$featname-eval.txt
 echo "--- Apply the ami model ---"
 
 # trained model stem
-trainmlpdir="/exports/home/clai/nn/output/mlp/"
+#trainmlpdir="/exports/home/clai/nn/output/mlp/"
+trainmlpdir=/disk/data1/clai/work/inevent/data/mlp/
 traincorpus="ami"
 trainpkl=${traincorpus}_mlp_${varname}-${pcontext}.${ncontext}.${normtype}
 echo $trainpkl
@@ -123,15 +127,17 @@ infile=$testsetdir/$featname-eval.txt
 outfile=$testsetdir/${corpus}_mlp_${featname}_${n_in}-$hname.prob
 
 echo $infile $n_in $corpus $testonly $model $hsize
-./apply-mlp.sh $infile $model $n_in $hsize $outfile $testonly
+. $SCRIPTDIR/apply-mlp.sh $infile $model $n_in $hsize $outfile $testonly
 
-##-----------------------------------------------------------------------
+echo "------------------------------------"
+#-----------------------------------------------------------------------
 ## get flat file version of mlp output
 echo $teststem
-#./get-mlp-out.sh $teststem $n_in $segsdir "$scale"
-#
+
 
 # Join back with identifiers, niteid etc.
+
+echo "---- get-word-ids ---------" 
 probfname=$testsetdir/${corpus}_mlp_${fset}_${n_in}-${hsize}.prob.eval.txt
 idfname=$testsetdir/$featname-eval.txt
 lexdir=$segsdir/${lextype}lex/
@@ -139,15 +145,19 @@ Rscript $RSCRIPTS/get-word-ids.r $probfname $idfname $lexdir
 
 
 #-----------------------------------------------------------------------
-# get DA level features 
+# get longer segment, e.g. DA, level features 
+
 echo "--- get word da features ---"
 fset_layer=${fset}_${n_in}-${hsize}
 windowtype=asrutt
 SPKONLY=T
 
 echo ${fset_layer}
-Rscript $RSCRIPTS/get-tf-window.r $conv $lexname $segsdir $windowtype $SPKONLY ${fset_layer} 
+Rscript $RSCRIPTS/get-tf-window.r $conv $lexname $segsdir $windowtype $SPKONLY ${fset_layer} $segsdir/asrutt 
+
+echo "autosent0.7"
+windowtype=autosent0.7
+Rscript $RSCRIPTS/get-tf-window.r $conv $lexname $segsdir $windowtype $SPKONLY ${fset_layer} $segsdir/asrsent/  
 
 echo "DONE"
-exit 0
 

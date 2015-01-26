@@ -15,6 +15,10 @@ filename=~/data/$CORPUS/UEDIN_ASR_201407/$conv.json
 infofile=~/data/$CORPUS/filenames.txt
 echo $conv $filename
 
+if [ ! -e $datadir ]
+then
+	mkdir $datadir
+fi
 
 ## The naming of these directories is a bit historical at this point
 ## $datadir/segs is where features related to various segments of the meeting 
@@ -55,6 +59,12 @@ then
 	ln -s $datadir/asrutt $datadir/segs/
 fi
 
+if [ ! -e $datadir/asrsent ]
+then
+	mkdir $datadir/asrsent
+	ln -s $datadir/asrsent $datadir/segs/
+fi
+
 ## This is for doing rouge stuff.  Not really needed if we don't have a gold
 ## Standard to compare to.
 
@@ -78,6 +88,17 @@ fi
 ## sge: get-new-json-$conv,  no holds 
 qsub -N get-new-json-$conv $SGESCRIPTS/get-ed-new-json.sh $filename  $CORPUS $infofile  
 
+wordfile=$datadir/asrword/$conv.raw.asrword.txt
+punctreefile=../sentence/punctree
+wordvar=word
+startvar=wstart
+wordid=niteid
+qsub -N get-autopunc-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-apply-punc.sh $wordfile $punctreefile $wordvar $startvar $wordid
+
+sentfile=$datadir/asrword/$conv.autopunc.words.txt
+qsub -N get-auto-sent-$conv -hold_jid get-autopunc-$conv $SGESCRIPTS/get-ed-auto-sent.sh $sentfile $datadir
+
+
 qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-feats.sh $conv $CORPUS
 
 #====================================================================================
@@ -98,20 +119,34 @@ qsub -N get-tf-feats-$conv -hold_jid get-new-json-$conv $SGESCRIPTS/get-ed-tf-fe
 #------------------------------------------------------------
 ## Word level prosodic aggregates
 ## sge: -N get-pwin-$FEATNAME-$WTYPE-$PREFIX -hold_jid get-pros-norm-$FEATNAME-$PREFIX 
-./inevent-pros-window-sub.sh asrword f0 $conv
-./inevent-pros-window-sub.sh asrword i0 $conv
+segsdir=$datadir/segs/asrword/
+./inevent-pros-window-sub.sh asrword f0 $conv $segsdir
+./inevent-pros-window-sub.sh asrword i0 $conv $segsdir
 
 ## Utterance level prosodic aggregates
 ## sge: -N get-pwin-$FEATNAME-$WTYPE-$PREFIX -hold_jid get-pros-norm-$FEATNAME-$PREFIX 
 ## FEATNAME={f0,i0}, WTYPE=asrutt, PREFIX=$conv 
-./inevent-pros-window-sub.sh asrutt f0 $conv
-./inevent-pros-window-sub.sh asrutt i0 $conv
+segsdir=$datadir/segs/asrutt/
+./inevent-pros-window-sub.sh asrutt f0 $conv $segsdir
+./inevent-pros-window-sub.sh asrutt i0 $conv $segsdir
+
+## Prosody aggregates over different sentence segmentations 
+## Based on full-stop insertion
+segsdir=$datadir/segs/asrsent/
+./inevent-pros-window-sub.sh asrsent f0 $conv $segsdir
+./inevent-pros-window-sub.sh asrsent i0 $conv $segsdir
+
+## Deleting lower confidence words 
+segsdir=$datadir/segs/asrsent/
+./inevent-pros-window-sub.sh "autosent0.7" f0 $conv $segsdir
+./inevent-pros-window-sub.sh "autosent0.7" i0 $conv $segsdir
 
 #------------------------------------------------------------
 ## combine term-frequency and prosodic word features
 ## sge: -N get-tfpros-$wtype{lex}-$conv -hold_jid get-tf-feats-$conv,get-pwin-i0-${wtype}lex-$prefix,get-pwin-f0-${wtype}lex-$prefix
 ## wtype=asr, prefix=$conv 
-./inevent-tf-pros-all-sub.sh asr $conv
+segfile="$datadir/segs/asrword/$conv.raw.asrword.txt"
+./inevent-tf-pros-all-sub.sh asr $conv $segfile
 
 ## Get augmented lexical features
 echo "Name: get-aug-$conv"
@@ -119,22 +154,25 @@ echo "holds: get-tfpros-asrlex-$conv"
 
 qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv $SGESCRIPTS/get-ed-aug-lex.sh $conv
 
+#qsub -N get-aug-$conv -hold_jid get-tfpros-asrlex-$conv $SGESCRIPTS/get-ed-aug-lex-aggs.sh $conv asrsent
+
 ## Utterance level prosody delta features 
 # -N get-tfseq-$featname-$conv -hold_jid get-pwin-$featname-asrutt-$conv
 ## $featname={i0,f0} 
-./inevent-pros-da-aggs.sh $conv
+fsuffix=".aggs.asrutt.txt"
+./inevent-pros-da-aggs.sh $conv $fsuffix 
 
 #------------------------------------------------
 
 ## Gather lexical features for utterance level prediction 
 ## -N get-fx0-$fsetname-$prefix -hold_jid get-aug-$prefix,get-tfseq-i0-$prefix,get-tfseq-f0-$prefix
-
-./inevent-lex-feats-sub.sh "aug.wsw" $conv 
-
+./inevent-lex-feats-sub.sh "aug.wsw" $conv asrutt
 
 ## Apply AMI DA models
 ## -N apply-mod-$dataset -hold_jid get-fx0-$fsetname-$conv  
 ## fsetname="aug.wsw"
+
+./inevent-apply-mods-sub.sh "aug.wsw" "$conv.$CORPUS.group.fx0.aug.wsw.asrutt" "ami.group.fx0.aug.wsw"
 
 ./inevent-apply-mods-sub.sh "aug.wsw" "$conv.$CORPUS.group.fx0.aug.wsw" "ami.group.fx0.aug.wsw"
 ./inevent-apply-mods-sub.sh "da.bare" "$conv.$CORPUS.group.fx0.aug.wsw" "ami.group.fx0.aug.wsw"

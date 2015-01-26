@@ -4,12 +4,12 @@
 #$ -cwd
 #$ -o ./edout
 #$ -e ./edout
-#$ -l h_rt=24:00:00
+#$ -l h_rt=6:00:00
 # Initialise environment module
 
 . /etc/profile.d/modules.sh
 
-export PATH=$HOME/local/bin:$PATH
+export PATH=/disk/data1/clai/local/bin:$HOME/local/bin:$PATH
 
 RSCRIPTS=../rscripts/
 #module load R
@@ -18,7 +18,8 @@ RSCRIPTS=../rscripts/
 CONV=$1
 FEAT=$2
 SEGSDIR=$3
-WTYPE=$4
+WDIR=$4
+WTYPE=$5
 
-Rscript $RSCRIPTS/get-pros-window.r $CONV $FEAT $SEGSDIR $SEGSDIR/$WTYPE $WTYPE 
+Rscript $RSCRIPTS/get-pros-window.r $CONV $FEAT $SEGSDIR $WDIR $WTYPE 
 

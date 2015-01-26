@@ -1,4 +1,5 @@
-#options( java.parameters = "-Xmx100m" )
+#options( java.parameters = "-Xmx100m" )#
+library(methods)
 source("../sentence_breaks/punc-classifier.r")
 
 ################################################
@@ -14,13 +15,16 @@ filename <- args[1]
 punctreefile <- args[2]
 word.var <- args[3]
 start.var <- args[4]
+word.id <- args[5]
 
 fstem <- basename(filename)
 
 x <- load(punctreefile)
 punctree <- get(x)
 
-get.test.data(filename, punctree, word.var=word.var, start.var=start.var) 
+get.autopunc.words(filename, punctree, word.var=word.var, start.var=start.var, word.id=word.id) 
+
+
 
 
 

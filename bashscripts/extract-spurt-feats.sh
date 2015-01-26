@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PRAATSCRIPTS=../praatscripts/
-PRAAT=/exports/home/clai/.local/bin/praat
+PRAAT=praat #/exports/home/clai/.local/bin/praat
 spurtfile=$1
 spurtdir=$2 	## This is the output directory 	
 indir=$3	## i.e. where the wav files are    
@@ -47,8 +47,9 @@ do
         fi
 
 	echo  $wavfile $outfile $start $end $indir $outdir $conv 
-	$PRAAT $PRAATSCRIPTS/extract-feats.praat $wavfile $outfile $start $end $indir $outdir $conv 
+	echo `which praat`
+	praat ../praatscripts/extract-feats.praat $wavfile $outfile $start $end $indir $outdir $conv 
 
 done  
 
-exit 0
+#exit 0

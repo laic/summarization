@@ -8,11 +8,11 @@
 # Initialise environment module
 
 . /etc/profile.d/modules.sh
-
-export PATH=$HOME/summarization/ineventwrappers/:$PATH
-
+export PATH=/disk/data1/clai/local/bin:$PATH
+export HOME=/disk/data1/clai/
 # Run the program
 
+SCRIPTDIR="../bashscripts/"
 
 spurtfile=$1
 spurtdir=$2 #~/data/ted/derived/wavutts/
@@ -26,7 +26,6 @@ then
        exit 1  
 fi
 
-./extract-spurt-feats.sh $spurtfile $spurtdir $indir 
+. $SCRIPTDIR/extract-spurt-feats.sh $spurtfile $spurtdir $indir 
 
-exit 0
 

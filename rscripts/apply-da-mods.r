@@ -19,6 +19,8 @@ if(length(args)==0){
 	print("=======args==========")
         print(args)
 	print("=====================")
+	da.word.file <- NULL	
+	trans.file <- NULL
 
         fsetname <- args[1]
 	dataset <- args[2]
@@ -27,16 +29,25 @@ if(length(args)==0){
 	mod.dataset <- args[5]	
 	mod.datadir <- args[6]
 	mod.corpus <- args[7]
-	da.word.file <- args[8]
+	word.file <- args[8]
+	wtype <- args[9]
+
+	if (grepl("trans", word.file)) { trans.file <- word.file }
+	if (grepl("word", word.file)) { da.word.file <- word.file }
+	print(paste("wtype:", wtype))
 
 	print("=== get feature data.table ===")
 	print(paste("dataset:", dataset))	
 	print(paste("da.word.file:", da.word.file))	
-	group.fx0 <- prep.data(filename=paste(datadir, "/da-feats/", dataset, sep=""), da.word.file=da.word.file)
+	print(paste("trans.file", trans.file))	
+
+
+	group.fx0 <- prep.data(filename=paste(datadir, "/da-feats/", dataset, sep=""), da.word.file=da.word.file, trans.file=trans.file)
 	#group.fx0 <- prep.data(filename=paste(datadir, "/da-feats/", dataset, sep=""), da.word.file=NULL)
 	#print(group.fx0)
 
 	dset.prefix <- strsplit(dataset, "\\.")[[1]][1] 
+	#wtype <- tail(strsplit(dataset, "\\.")[[1]], 1)
 
 	print("=== make dirs ===")
 	print(datadir)
@@ -59,12 +70,12 @@ if(length(args)==0){
 
 	#da.text <- read.table(paste(da.word.file, ".text", sep=""), header=T)
 	print("=== apply models ===")
-	print(names(group.fx0))
+	#print(names(group.fx0))
 	apply.fset.mods(group.fx0, fsetname=fsetname, 
 			evaldir=evaldir,
 			moddir=moddir,
 			sevaldir=sevaldir, 
-			corpus=corpus, mod.corpus=mod.corpus, dset=dset.prefix) 
+			corpus=corpus, mod.corpus=mod.corpus, dset=dset.prefix, wtype=wtype) 
 
 }
 

@@ -10,9 +10,9 @@
 
 . /etc/profile.d/modules.sh
 
-export PATH=~/local/bin/:$PATH
+export PATH=/disk/data1/clai/local/bin:~/local/bin/:$PATH
 RSCRIPTS="../rscripts/"
-#module load R
+
 # Run the program
 # -pe memory-2G 2
 
@@ -22,12 +22,12 @@ datadir=$3
 pscores=$4 	## Include participation measures?
 lextype=$5	## i.e. asr 
 prefix=$6	## i.e. conv
-
+wtype=$7	## e.g. asrsent
 
 
 echo "R: `which R`"
 echo $fsetname $corpus $datadir $pscores $lextype $prefix
 
-Rscript $RSCRIPTS/get-lex-feats.r $fsetname $corpus $datadir $pscores $lextype $prefix
+Rscript $RSCRIPTS/get-lex-feats.r $fsetname $corpus $datadir $pscores $lextype $prefix $wtype
 
 

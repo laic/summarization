@@ -15,13 +15,22 @@ if(length(args)==0){
 	window.type <- args[4]
 	spk.only <- as.logical(args[5])
 	featset <- args[6] 	## e.g. tf.pros
+
+	if (length(args) == 7) {
+		windowdir <- args[7] 		
+	} else {
+		windowdir <- paste(segsdir, "/", window.type, "/", sep="")		
+	}
 	
 	## Get windows		
-	windowfile <- paste(segsdir, "/", window.type, "/", currconv, ".conv.", window.type, sep="")		
-	windowobj <- load(windowfile)
-	x.list <- get(windowobj)
+	windowfile <- paste(windowdir, "/", currconv, ".conv.", window.type,".txt", sep="")		
+	#print(windowfile)
+	#windowobj <- load(windowfile)
+	#x.list <- get(windowobj)
 
-	x.window <- data.table(unlist.df(x.list))
+	#x.window <- data.table(unlist.df(x.list))
+	x.window <- data.table(read.table(windowfile, header=T))
+	print(summary(x.window))
 	print("HERE")
 
 	## This was supposed to make parallelization easier, but maybe needs rethinking.

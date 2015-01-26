@@ -1,8 +1,9 @@
 
 export SGESCRIPTS="../sgescripts/"
 export RSCRIPTS="../rscripts/"
-export PRAATSCRIPTs="../praatscripts/"
-export PYSCRIPTs="../pyscripts/"
+export PRAATSCRIPTS="../praatscripts/"
+export PYSCRIPTS="../pyscripts/"
+export SCRIPTDIR="../bashscripts/"
 export CORPUS="inevent"
 export PRAAT=$HOME/.local/bin/praat
 
