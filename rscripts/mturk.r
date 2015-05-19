@@ -1,3 +1,5 @@
+library(data.table)
+library(ggplot2)
 plot.btest.qs <- function() {
 	btest <- data.table(read.csv("~/mturk/surveymonkey/btest/CSV/Sheet_1.csv"))
 	setnames(btest,  names(btest)[10:18], paste("q",1:9,sep="" ))

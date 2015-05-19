@@ -8,7 +8,7 @@ get.qrank <- function(x) {
 			x[,list(conv=Input.conv, niteid=Input.secondid, lval=Input.secondlval)])))
 
 	x.id <- x.id[order(conv, lval)]
-	qrank <- x.id[,list(niteid, lval, order(lval,decreasing=T)),by=conv]
+	qrank <- x.id[,list(niteid, lval, qrank=order(lval,decreasing=T)),by=conv]
 
 	return(qrank)
 
@@ -16,6 +16,8 @@ get.qrank <- function(x) {
 
 main <- function() {
 x <- data.table(read.csv("~/mturk/quoteresults.csv", header=T))
+
+qrank <- get.qrank(x)
 
 y <- x[,list(hit=HITId, conv=Input.conv, q1=Input.firstid, q2=Input.secondid, Ans=Answer.Q1Answer, 
 	firsthigh=Input.firstlval > Input.secondlval, 
@@ -25,6 +27,7 @@ y <- x[,list(hit=HITId, conv=Input.conv, q1=Input.firstid, q2=Input.secondid, An
 
 setnames(y, "q1", "niteid")
 setkey(y, niteid, conv)
+setkey(qrank, niteid, conv)
 y <- qrank[y]
 setnames(y, "niteid", "q1")
 setnames(y, c("lval", "qrank"), c("lval1","qrank1"))
@@ -44,6 +47,8 @@ r1[y$qrank1 > y$qrank2] <- y$qrank2[y$qrank1 > y$qrank2]
 r2[y$qrank1 > y$qrank2] <- y$qrank1[y$qrank1 > y$qrank2]
 first.ans[y$qrank1 > y$qrank2] <- !first.ans[y$qrank1 > y$qrank2]
 y <- data.table(y, r1=r1, r2=r2, first=first.ans, nwordsdiff=y$nwords1-y$nwords2)
+
+v <- y[, list(conv, select1=length(Ans[Ans==1]), lvaldiff=(lval1-lval2)),by=list(hit, q1, q2, lval1, lval2, r1, r2, qrank1, qrank2, nwordsdiff, firsthigh, trans1, trans2)]
 
 v <- y[, list(select1=length(Ans[Ans==1]), lvaldiff=(lval1-lval2)),by=list(hit, q1, q2, lval1, lval2, r1, r2, qrank1, qrank2, nwordsdiff, firsthigh)]
 
