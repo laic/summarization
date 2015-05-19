@@ -17,12 +17,12 @@ export PATH=/disk/data1/clai/local/bin:~/local/bin:$PATH
 filename=$1
 corpus=$2
 infofile=$3
-
+datadir=$4
 #export DATADIR=$DATADIR
 #export DATADIR="~/data/inevent/derived/"
 
 echo `which R`
 
-Rscript ../rscripts/get-new-json.r $filename $corpus $infofile 
+Rscript ../rscripts/get-new-json.r $filename $corpus $infofile $datadir
 
 

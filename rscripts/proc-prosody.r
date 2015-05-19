@@ -10,7 +10,7 @@ source("../rscripts/nxt-proc.r")
 ## default window size is 15 seconds.
 
 get.var.aggs.spk <- function(xdt, windows=NULL, wkey="xid", wsize=15, var.name="F0") {
-	print(xdt)
+	#print(xdt)
 	var.aggs.spk <- ddply(xdt, c("conv","nxt_agent"), get.xint.windows,
 			windows=windows, wkey=wkey, fx=get.var.aggs.window, wsize=wsize, var.name=var.name)
 	return(data.table(var.aggs.spk))
@@ -76,7 +76,7 @@ get.i0.aggs.spk <- function(xdt, windows=NULL, wkey="xid", wsize=15) {
 }
 
 get.f0.aggs.spk <- function(xdt, windows=NULL, wkey="xid", wsize=15) {
-	print(xdt)
+#	print(xdt)
 	f0.aggs.spk <- ddply(xdt, c("conv","nxt_agent"), get.xint.windows,
 			windows=windows, wkey=wkey, fx=get.f0.aggs.window, wsize=wsize)
 	return(data.table(f0.aggs.spk))

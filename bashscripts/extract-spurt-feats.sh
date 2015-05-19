@@ -25,13 +25,14 @@ do
 		echo "multiple channels?" 
 	fi
 
-	if [[ $vidsrc == "ted" ]]	
-	then 
-		wavfile=${vconv}-light.wav
-	else  
+	
+	#if [[ $vidsrc == "ted" ]]	
+	#then 
+	#	wavfile=${vconv}-light.wav
+	#else  
 		wavfile=${vconv}.wav
 		#echo "unknown video source:" $vidsrc	
-	fi
+	#fi
 
 	outfile=$niteid
 	outdir="$spurtdir/$conv/"

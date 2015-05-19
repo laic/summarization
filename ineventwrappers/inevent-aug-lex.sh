@@ -141,6 +141,7 @@ echo "---- get-word-ids ---------"
 probfname=$testsetdir/${corpus}_mlp_${fset}_${n_in}-${hsize}.prob.eval.txt
 idfname=$testsetdir/$featname-eval.txt
 lexdir=$segsdir/${lextype}lex/
+ 
 Rscript $RSCRIPTS/get-word-ids.r $probfname $idfname $lexdir
 
 
@@ -157,6 +158,10 @@ Rscript $RSCRIPTS/get-tf-window.r $conv $lexname $segsdir $windowtype $SPKONLY $
 
 echo "autosent0.7"
 windowtype=autosent0.7
+Rscript $RSCRIPTS/get-tf-window.r $conv $lexname $segsdir $windowtype $SPKONLY ${fset_layer} $segsdir/asrsent/  
+
+echo "asrsent"
+windowtype=asrsent
 Rscript $RSCRIPTS/get-tf-window.r $conv $lexname $segsdir $windowtype $SPKONLY ${fset_layer} $segsdir/asrsent/  
 
 echo "DONE"

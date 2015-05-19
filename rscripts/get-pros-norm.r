@@ -48,8 +48,9 @@ if (featname == "i0") {
 ##----------------------------------------------------------------
 ## Get spurt info
 ## Need to account for some inconsistencies in file creation in the past!
+print(spurtfile)
 if (grep(".txt", spurtfile)) {
-	if (grep("asrspurts", spurtfile)) {  
+	if (grepl("asrspurts", spurtfile) || grepl("turns", spurtfile)) {  
 		spurts.channel <-  data.table(read.table(spurtfile, header=F))
 		setnames(spurts.channel, c("conv","spk","participant","sid","chno","vsrc","starttime","endtime","wid","vconv","wav.file","video.file"))
 	} else {
@@ -59,6 +60,9 @@ if (grep(".txt", spurtfile)) {
 	spurts.obj <- load(spurtfile)
 	spurts.channel <- get(spurts.obj)
 }
+
+
+#summary(spurts.channel)
 
 ## Add offset times
 x.offset <- add.times(x.list, spurts.channel) 

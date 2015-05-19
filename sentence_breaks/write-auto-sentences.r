@@ -79,7 +79,7 @@ write.table(trans, file=paste(sentdir,"/", currconv, ".asrsent.trans.txt", sep="
 
 worddir <- paste(datadir, "/asrword/", sep="")
 #for (threshold in c(0.0, 0.5, 0.7, 0.9, 1)) {
-for (thresholds in c(0.0, 0.7, 1)) {
+for (threshold in c(0.0, 0.7, 1)) {
 	currsw.conf <- copy(currsw) 
 	currsw.conf <- currsw.conf[order(wstart)]
 	currsw.conf$word <- unlevel(currsw.conf$word)

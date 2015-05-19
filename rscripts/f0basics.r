@@ -193,6 +193,7 @@ max.value <- function(x0, xname="Time", yname="Value") {
 
 slope.value <- function(x0, xname="ActualTime", yname="Value", sampletime=F) {
 	#print(c(xname, yname)) 
+	print(x0)
 	x <- x0[!is.na(x0[[yname]]),]	
 	zy <- x[[yname]]
 	zx <- x[[xname]]
