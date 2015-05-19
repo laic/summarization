@@ -13,14 +13,40 @@ fi
 ## Set up variables
 ##################################################################
 
-## Input vars
+## Input vars, expect full paths if not in the running directory
 asrjson=$1
 wavfile=$2
 vidfile=$3
 EVENTDIR=$4
-conv=`basename $asrjson .asr.json`
 
-echo $asrjson $EVENTDIR $conv
+echo inevent-summarization.sh: $asrjson $wavfile $vidfile $EVENTDIR
+
+asrstem=`basename $asrjson | sed s/[-_]//g `
+echo "asrstem: $asrstem"
+if [ ! -e $EVENTDIR/asr/$asrstem ]
+then
+	echo "linking $asrjson $EVENTDIR/asr/$asrstem" 
+	ln -s $asrjson $EVENTDIR/asr/$asrstem
+fi
+asrjson=$EVENTDIR/asr/$asrstem
+echo "asrjson: $asrjson"
+
+conv=`basename $asrjson .asr.json`
+echo "conv: $conv"
+
+wavstem=`basename $wavfile | sed s/[-_]//g `
+echo "wavstem: $wavstem"
+if [ ! -e $EVENTDIR/wav/$wavstem ]
+then
+	echo "linking $EVENTDIR/wav/$wavstem" 
+	ln -s $wavfile $EVENTDIR/wav/$wavstem
+	#wavfile=$EVENTDIR/$wavstem
+fi
+
+wavfile=$EVENTDIR/wav/$wavstem
+echo "wavfile: $wavfile"
+
+
 
 ## Setup for inevent on majestic 
 ## We don't actually need to use all these absolute paths since we 
@@ -35,79 +61,69 @@ PRAATSCRIPTs=$SCRIPTDIR/praatscripts/
 CORPUS="inevent"
 
 datadir=$EVENTDIR/derived/
-wavdir=$EVENTDIR/
+wavdir=$EVENTDIR/wav/
 
 #######################################################
 ## Make directories 
 #######################################################
 
-if [ ! -e $datadir ]
-then
-	mkdir $datadir
-fi
+#if [ ! -e $datadir ]
+#then
+#	mkdir $datadir
+#fi
 
 ## The naming of these directories is a bit historical at this point ##
 ## but the rational was that $datadir/segs is where features related to
 ## various segments of the meeting ##are stored.  
-if [ ! -e $datadir/segs ]
-then
-	mkdir $datadir/segs
-	mkdir $datadir/segs/asrlex	## Lexical features	
-	mkdir $datadir/segs/f0		## F0
-	mkdir $datadir/segs/i0		## intensity
-	mkdir $datadir/segs/reval	## Last level of R output: Utt level extractive summary probabilites etc.
-	mkdir $datadir/segs/nn		## This is probably one to do away with
-	mkdir $datadir/segs/all		## This one might be done away with too
-	mkdir $datadir/segs/test 	## And this one
-fi
+echo datadir: $datadir
+
+mkdir -p $datadir/segs/asrlex	## Lexical features	
+mkdir -p $datadir/segs/f0		## F0
+mkdir -p $datadir/segs/i0		## intensity
+mkdir -p $datadir/segs/reval	## Last level of R output: Utt level extractive summary probabilites etc.
+mkdir -p $datadir/segs/nn		## This is probably one to do away with
+mkdir -p $datadir/segs/all		## This one might be done away with too
+mkdir -p $datadir/segs/test 	## And this one
 
 
 ## This is where raw features from praat end up.
 ## Rename to rawpros or something more descriptive?
 if [ ! -e $datadir/wavutts ]
 then
-	mkdir $datadir/wavutts
+	mkdir -p $datadir/wavutts
 	ln -s $datadir/wavutts $datadir/segs/conv
 fi
 
 ## Timing info about words based on ASR output 
 if [ ! -e $datadir/asrword ]
 then
-	mkdir $datadir/asrword
+	mkdir -p $datadir/asrword
 	ln -s $datadir/asrword $datadir/segs/
 fi
 
 ## Timing info about utterances based on ASR output 
 if [ ! -e $datadir/asrutt ]
 then
-	mkdir $datadir/asrutt
+	mkdir -p $datadir/asrutt
 	ln -s $datadir/asrutt $datadir/segs/
 fi
 
 ## Timing info about utterances after resegmentation of  ASR output 
 if [ ! -e $datadir/asrsent ]
 then
-	mkdir $datadir/asrsent
+	mkdir -p $datadir/asrsent
 	ln -s $datadir/asrsent $datadir/segs/
 fi
 
 ## This is for doing rouge stuff.  Not really needed if we don't have a gold
 ## Standard to compare to.
 
-if [ ! -e $datadir/summeval/ ]
-then
-	mkdir $datadir/summeval/
-	mkdir $datadir/summeval/systems
-	mkdir $datadir/summeval/models
-	echo "mkdir $datadir/summeval/"
-fi
+mkdir -p $datadir/summeval/systems
+mkdir -p $datadir/summeval/models
 
 ## Where we put our collated feature sets for DA/utterance level 
 ## predictions.
-if [ ! -e $datadir/da-feats ]
-then
-	mkdir $datadir/da-feats
-fi
+mkdir -p $datadir/da-feats
 
 
 ###################################################################
@@ -116,6 +132,19 @@ fi
 ## inEvent core set as a batch and using a key file created by fmi to   
 ## match the events to the various media files.
 ##################################################################
+
+
+wavstem=`basename $wavfile`
+wavext="${wavstem##*.}"
+
+echo "wav ext: $wavext"
+if [ "$wavext" != "wav" ]
+then
+	echo "converting wav file"  	
+	ffmpeg -i $wavfile -ar 16000 -ac 1 -y $EVENTDIR/wav/$conv.wav 
+	wavfile=$EVENTDIR/wav/$conv.wav
+fi
+
 
 echo "id video.file json.file wav.file" > $datadir/$conv.info.txt  
 echo "x `basename $vidfile` `basename $asrjson` `basename $wavfile | sed s/[_-]//g`" >> $datadir/$conv.info.txt
@@ -131,7 +160,7 @@ infofile=$datadir/$conv.info.txt
 #echo $SGESCRIPTS
 
 ## sge: get-new-json-$conv,  no holds 
-qsub -N get-new-json-$conv $SGESCRIPTS/get-ed-new-json.sh $asrjson $CORPUS $infofile  
+qsub -N get-new-json-$conv $SGESCRIPTS/get-ed-new-json.sh $asrjson $CORPUS $infofile $datadir
 
 wordfile=$datadir/asrword/$conv.raw.asrword.txt
 punctreefile=../sentence/punctree
@@ -237,4 +266,12 @@ wtype="autosent0.7"
 ./inevent-lex-feats-sub.sh "aug.wsw" $conv "autosent0.7" $datadir
 ./inevent-apply-mods-sub.sh "aug.wsw" "$conv.$CORPUS.group.fx0.aug.wsw.autosent0.7" "ami.group.fx0.aug.wsw" "autosent0.7" $datadir $moddir 
 
+wtype="asrsent"
+./inevent-pros-da-aggs.sh $conv $wtype $segsdir
+./inevent-lex-feats-sub.sh "aug.wsw" $conv "asrsent" $datadir
+./inevent-apply-mods-sub.sh "aug.wsw" "$conv.$CORPUS.group.fx0.aug.wsw.asrsent" "ami.group.fx0.aug.wsw" "asrsent" $datadir $moddir 
+
+
+#ln -s $DATADIR/segs/reval/ami.group.fx0.aug.wsw/$fstem.tf.pros_pros.autosent0.7.json $DATADIR/$fstem.extsumm.json 
+#ln -s $DATADIR/segs/reval/ami.group.fx0.aug.wsw/$fstem.tf.pros_pros.asrutt.json $DATADIR/$fstem.extsumm.asrutt.json 
 

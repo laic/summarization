@@ -83,8 +83,9 @@ if(length(args)==0){
 filename <- args[1]
 corpus <- args[2]
 info.file <- args[3]
+datadir <- args[4]
 
-datadir <- Sys.getenv("DATADIR") 
+#datadir <- Sys.getenv("DATADIR") 
 if (datadir=="") {
 	print("No DATADIR in environment. Set to default.")
 	datadir <- paste(dirname(filename), "/derived/", sep="")

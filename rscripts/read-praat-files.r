@@ -36,7 +36,7 @@ add.times <- function(x.list, x.spurts.channel) {
 
 normalize.conv <- function(x, x.aggs, var.name="F0", st=c("mean.val", "q5.val", "none"), zscore=F, center=c("mean","min","none"), 
 			remove.outliers=c("q1.val","q5.val","none"), remove.spurt.slope=F) {
-	print("normalize.conv")
+	#print("normalize.conv")
         u <- copy(x)
         setnames(u, c(var.name), c("val"))
         participants <- unique(u$participant)
@@ -116,6 +116,7 @@ normalize.vals.spk <- function(u, x.aggs, var.name="F0", st=c("mean.val", "q5.va
 
 ##-----------------------------------------------------------------
 get.slope.correction <- function(x, xname="Time", yname="val") {
+#	print("get.slope.correction")
 	zy <- x[[yname]]
         zx <- x[[xname]]
 

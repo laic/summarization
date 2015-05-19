@@ -18,7 +18,7 @@ get.tiers <- function(pdir, filenames=NULL, suffix=".PitchTier", xname="Time",yn
 	print("get.tiers loop")
         for (filename in curr.files) {
                 if (file.exists(paste(pdir, filename, sep="/"))) {
-			print(filename)
+		#	print(filename)
                         curr0 <- try(read.table(paste(pdir, filename, sep="/"), header=F, 
 					na.strings="--undefined--", skip=skip))
 			if (is.data.frame(curr0)) {
@@ -26,7 +26,7 @@ get.tiers <- function(pdir, filenames=NULL, suffix=".PitchTier", xname="Time",yn
 				curr <- data.table(get.tier(curr0, short=short))
 				setnames(curr, c(xname, yname))
 				fstem <- paste(head(strsplit(filename, split="\\.")[[1]], -1), collapse=".")
-				print(fstem)
+				#print(fstem)
 				if (nrow(curr) >= 3) {
 					pitchtiers[[fstem]] <- data.table(fstem=fstem, curr)
 					#save(pitchtiers, file="curr.tiers.obj")
